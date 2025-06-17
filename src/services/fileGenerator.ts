@@ -100,20 +100,25 @@ export async function downloadPDF(resume: GeneratedResume) {
       yPosition = margin
     }
 
+    // Company Name (More prominent)
     pdf.setFontSize(12)
     pdf.setFont(undefined, 'bold')
-    pdf.text(work.position, margin, yPosition)
-    
-    const dateRange = `${formatDate(work.startDate)} - ${work.isCurrent ? 'Present' : formatDate(work.endDate)}`
-    pdf.text(dateRange, pageWidth - margin, yPosition, { align: 'right' })
-    yPosition += 5
-
-    pdf.setFontSize(10)
-    pdf.setTextColor(0, 100, 200)
-    pdf.setFont(undefined, 'bold')
-    pdf.text(work.company, margin, yPosition)
+    pdf.setTextColor(0, 0, 0)
+    pdf.text(`  ${work.company.toUpperCase()}`, margin, yPosition)
     yPosition += 6
 
+    // Position and Date
+    pdf.setFontSize(11)
+    pdf.text(`    ${work.position}`, margin, yPosition)
+    
+    const dateRange = `${formatDate(work.startDate)} - ${work.isCurrent ? 'Present' : formatDate(work.endDate)}`
+    pdf.setFont(undefined, 'italic')
+    pdf.text(dateRange, pageWidth - margin - 2, yPosition, { align: 'right' })
+    pdf.setFont(undefined, 'normal')
+    yPosition += 6
+
+    // Achievements
+    pdf.setFontSize(10)
     pdf.setTextColor(0, 0, 0)
     pdf.setFont(undefined, 'normal')
     work.achievements.forEach(achievement => {
@@ -121,7 +126,7 @@ export async function downloadPDF(resume: GeneratedResume) {
       pdf.text(achievementLines, margin + 2, yPosition)
       yPosition += achievementLines.length * 4 + 1
     })
-    yPosition += 4
+    yPosition += 8
   })
 
   // Technical Skills (moved after Professional Experience)
@@ -321,11 +326,28 @@ export async function downloadDocx(resume: GeneratedResume) {
         }),
         
         ...resume.workExperiences.flatMap(work => [
+          // Company Name (More prominent)
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `    ${work.company}`,
+                bold: true,
+                size: 24, // 12pt
+                color: '000000',
+                font: 'Calibri',
+              }),
+            ],
+            spacing: {
+              before: 240, // 12pt before
+              after: 60,   // 3pt after
+            },
+          }),
+          
           // Job Title and Date (with right-aligned date)
           new Paragraph({
             children: [
               new TextRun({
-                text: work.position,
+                text: `    ${work.position}`,
                 bold: true,
                 size: 24, // 12pt
                 font: 'Calibri',
@@ -334,6 +356,7 @@ export async function downloadDocx(resume: GeneratedResume) {
                 text: `\t${formatDate(work.startDate)} - ${work.isCurrent ? 'Present' : formatDate(work.endDate)}`,
                 size: 22, // 11pt
                 font: 'Calibri',
+                italics: true,
               }),
             ],
             tabStops: [
@@ -343,28 +366,11 @@ export async function downloadDocx(resume: GeneratedResume) {
               },
             ],
             spacing: {
-              before: 120, // 6pt before
-              after: 60,   // 3pt after
-            },
-          }),
-          
-          // Company Name
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: work.company,
-                bold: true,
-                size: 22, // 11pt
-                color: '0066CC',
-                font: 'Calibri',
-              }),
-            ],
-            spacing: {
               after: 120, // 6pt after
             },
           }),
           
-          // Achievements
+          // Achievements with improved formatting
           ...work.achievements.map(achievement => 
             new Paragraph({
               children: [
@@ -385,11 +391,11 @@ export async function downloadDocx(resume: GeneratedResume) {
             })
           ),
           
-          // Space between jobs
+          // Clear separation between jobs
           new Paragraph({
             children: [new TextRun({ text: '', size: 12 })],
             spacing: {
-              after: 120, // 6pt after
+              after: 240, // 12pt after
             },
           }),
         ]),
@@ -463,6 +469,23 @@ export async function downloadDocx(resume: GeneratedResume) {
         }),
         
         ...resume.educations.flatMap(edu => [
+          // University Name (More prominent)
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: edu.university.toUpperCase(),
+                bold: true,
+                size: 24, // 12pt
+                color: '000000',
+                font: 'Calibri',
+              }),
+            ],
+            spacing: {
+              before: 120, // 6pt before
+              after: 60,   // 3pt after
+            },
+          }),
+          
           // Degree and Date (with right-aligned date)
           new Paragraph({
             children: [
@@ -476,6 +499,7 @@ export async function downloadDocx(resume: GeneratedResume) {
                 text: `\t${formatDate(edu.startDate)} - ${formatDate(edu.endDate)}`,
                 size: 22, // 11pt
                 font: 'Calibri',
+                italics: true,
               }),
             ],
             tabStops: [
@@ -483,23 +507,6 @@ export async function downloadDocx(resume: GeneratedResume) {
                 type: TabStopType.RIGHT,
                 position: 9360, // Right align at page margin
               },
-            ],
-            spacing: {
-              before: 120, // 6pt before
-              after: 60,   // 3pt after
-            },
-          }),
-          
-          // University Name
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: edu.university,
-                bold: true,
-                size: 22, // 11pt
-                color: '0066CC',
-                font: 'Calibri',
-              }),
             ],
             spacing: {
               after: 180, // 9pt after
