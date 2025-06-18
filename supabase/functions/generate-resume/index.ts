@@ -472,7 +472,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
         }
       ],
       temperature: 0.4, // Slightly higher for more creative project descriptions
-      max_tokens: 4500 // Increased for longer content
+      max_tokens: 4096 // Fixed: Reduced from 4500 to comply with gpt-3.5-turbo limit
     })
   })
 
@@ -503,7 +503,7 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 4500, // Increased for longer content
+      max_tokens: 4096, // Also reduced for consistency
       messages: [
         {
           role: 'user',
