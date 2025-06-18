@@ -1,21 +1,21 @@
 /*
-  # ATS-Optimized Resume Generation with 95%+ Score
+  # Project-Focused ATS Resume Generation with Detailed Real-World Projects
 
   This edge function creates ATS-optimized resumes by:
-  1. Using strategic keyword density (2-4% for primary keywords)
-  2. Extracting REAL technical skills from job descriptions
-  3. Creating natural language flow that passes ATS parsing
-  4. Balancing keyword optimization with readability
-  5. Using industry-standard formatting and terminology
-  6. Implementing semantic keyword matching
+  1. Generating 2-3 detailed real-world projects per work experience
+  2. Creating longer, comprehensive sentences (60-80 words)
+  3. Highlighting specific project names, roles, challenges, and solutions
+  4. Maintaining 95%+ ATS score through strategic keyword integration
+  5. Using natural language flow with detailed technical descriptions
+  6. Including comprehensive project scope and business impact
 
-  ## Key ATS Improvements
-  - Primary keywords appear 3-5 times across sections
-  - Technical skills extracted directly from job posting
-  - Natural language integration prevents keyword stuffing
-  - Industry-specific terminology and context
-  - Proper section headers and formatting
-  - Quantified achievements with relevant metrics
+  ## Key Features
+  - 2-3 detailed project achievements per work experience
+  - 3-4 additional strategic achievements for keyword optimization
+  - Longer sentences with comprehensive technical details
+  - Real project names that align with job description requirements
+  - Detailed role descriptions, challenges faced, and solutions implemented
+  - Business impact and measurable outcomes for each project
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
 
     if (settings.preferred_ai === 'anthropic' && !settings.anthropic_key) {
       return new Response(
-        JSON.stringify({ error: 'Anthropic is selected as preferred AI but no Anthropic API key is configured. Please add your Anthropic API key or switch to OpenAI.' }),
+        JSON.stringify({ error: 'Anthropic is selected as preferred AI but no Anthropic API key is configured. Please add your Anthropic API key or switch to Anthropic.' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with ATS optimization
+    // Generate AI content with detailed project focus
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure each work experience gets its achievements
@@ -236,7 +236,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createATSOptimizedPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createProjectFocusedPrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -254,14 +254,14 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createATSOptimizedPrompt(
+function createProjectFocusedPrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
   return `
-You are an expert ATS optimization specialist with 99.2% success rate. Create a resume that achieves 95%+ ATS score through strategic keyword integration and natural language flow.
+You are an expert ATS optimization specialist and technical resume writer with 99.5% success rate. Create a comprehensive, project-focused resume that achieves 95%+ ATS score through detailed real-world project descriptions and strategic keyword integration.
 
 JOB DESCRIPTION TO ANALYZE:
 ${jobDescription}
@@ -283,145 +283,157 @@ ${educations.map(edu => `
 - ${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})
 `).join('\n')}
 
-ATS OPTIMIZATION STRATEGY (95%+ Score Target):
+COMPREHENSIVE PROJECT-FOCUSED RESUME STRATEGY:
 
-1. KEYWORD EXTRACTION & DENSITY:
-   - Extract ALL technical skills, tools, frameworks, languages from job description
-   - Primary keywords: 3-5 mentions across sections
-   - Secondary keywords: 2-3 mentions
-   - Long-tail keywords: 1-2 strategic placements
-   - Maintain 2-4% keyword density for optimal ATS parsing
+1. PROFESSIONAL TITLE & SUMMARY:
+   - Title: Use EXACT job title + primary tech stack from job description
+   - Summary: 5-6 comprehensive sentences, 150-200 words total
+   - Include 20-25 keywords naturally integrated
+   - Start with experience level and exact role alignment
+   - Highlight top 4-5 technical skills from job description
+   - Include industry domain and specialization areas
+   - End with value proposition using job posting language
 
-2. PROFESSIONAL TITLE:
-   - Use EXACT job title from posting
-   - Add 1-2 primary technical keywords
-   - Format: "[Exact Job Title] | [Primary Tech Stack]"
-
-3. PROFESSIONAL SUMMARY (ATS Critical Section):
-   - 4-5 sentences, 120-150 words total
-   - Include 15-20 keywords naturally
-   - Start with years of experience + exact job title
-   - Include top 3 technical skills from job description
-   - Mention industry/domain from job posting
-   - End with value proposition using job description language
-
-4. WORK EXPERIENCE ACHIEVEMENTS:
-   Generate exactly 6 achievements per position:
+2. DETAILED PROJECT-FOCUSED ACHIEVEMENTS:
+   Generate exactly 7 achievements per work experience:
    
-   ACHIEVEMENT TYPES:
-   A) Technical Implementation (2 achievements):
-   - Focus on specific technologies mentioned in job description
-   - Include metrics and technical details
-   - Use action verbs from job posting
+   A) REAL-WORLD PROJECTS (3 achievements, 70-90 words each):
    
-   B) Leadership & Collaboration (2 achievements):
-   - Incorporate soft skills from job description
-   - Include team size, stakeholder management
-   - Use business impact language from posting
+   PROJECT STRUCTURE FOR EACH:
+   - **Project Name**: Create realistic, industry-specific project names that directly align with job description requirements
+   - **Your Role**: Specific technical role and responsibilities
+   - **Challenge**: Technical or business challenge that matches job description context
+   - **Solution**: Detailed technical implementation using technologies from job description
+   - **Impact**: Quantified business outcomes and technical improvements
    
-   C) Process & Innovation (2 achievements):
-   - Focus on methodologies mentioned in job description
-   - Include efficiency gains and improvements
-   - Use industry-specific terminology
+   PROJECT NAMING EXAMPLES BY INDUSTRY:
+   - Software/Web: "CustomerEngagement Platform", "RealTimeAnalytics Dashboard", "MicroservicesArchitecture Migration"
+   - E-commerce: "CheckoutOptimization Engine", "InventoryManagement System", "PersonalizationRecommendation Platform"
+   - FinTech: "PaymentProcessing Gateway", "RiskAssessment Framework", "ComplianceAutomation Suite"
+   - Healthcare: "PatientDataIntegration Platform", "TelehealthVideo System", "MedicalRecords Portal"
+   - Enterprise: "WorkflowAutomation Platform", "DataVisualization Dashboard", "SecurityCompliance Framework"
+   
+   B) STRATEGIC KEYWORD ACHIEVEMENTS (4 achievements, 60-80 words each):
+   - Leadership & Team Management (incorporating soft skills from job description)
+   - Cross-functional Collaboration (using business language from posting)
+   - Process Optimization & Innovation (methodologies from job description)
+   - Technical Excellence & Mentoring (quality practices from posting)
 
-5. TECHNICAL SKILLS EXTRACTION:
-   CRITICAL: Extract REAL technologies from job description
+3. TECHNICAL SKILLS EXTRACTION (CRITICAL):
    
-   STEP-BY-STEP PROCESS:
-   a) Scan job description for technical terms
-   b) Identify programming languages, frameworks, tools, platforms
-   c) Group into logical categories
-   d) Add complementary skills for each category
-   e) Use exact terminology from job posting
+   STEP-BY-STEP REAL TECHNOLOGY EXTRACTION:
+   a) Carefully read job description and identify ALL technical terms
+   b) Extract programming languages, frameworks, tools, platforms, methodologies
+   c) Group into 12-15 logical categories
+   d) Add complementary technologies that would be expected for this role
+   e) Use EXACT terminology from job posting
    
-   NEVER use placeholder text like "[Extract from JD]"
-   ALWAYS provide specific technology names
+   NEVER use placeholder text like "[Extract from JD]", "[List from job description]", or similar
+   ALWAYS provide specific, real technology names and frameworks
+   
+   EXAMPLE EXTRACTION:
+   If job mentions: "React, Node.js, AWS, Docker, PostgreSQL, REST APIs, Agile, TypeScript"
+   Then create:
+   - "Frontend Development: React.js, TypeScript, JavaScript ES6+, HTML5, CSS3, Redux, Material-UI"
+   - "Backend Technologies: Node.js, Express.js, RESTful APIs, GraphQL, Microservices Architecture"
+   - "Database Systems: PostgreSQL, MongoDB, Redis, Database Design, Query Optimization"
+   - "Cloud Platforms: AWS (EC2, S3, Lambda, RDS), Docker, Kubernetes, CI/CD Pipelines"
 
-6. ATS PARSING OPTIMIZATION:
-   - Use standard section headers: "PROFESSIONAL EXPERIENCE", "TECHNICAL SKILLS", "EDUCATION"
-   - Include exact job title matches
-   - Use consistent date formatting
-   - Include location information
-   - Use bullet points for achievements
-   - Maintain clean, parseable structure
+4. ATS OPTIMIZATION REQUIREMENTS:
+   - Primary keywords: 4-6 mentions across sections
+   - Secondary keywords: 2-3 strategic placements
+   - Maintain 3-5% keyword density for optimal parsing
+   - Use exact job title matches and terminology
+   - Include industry-specific language and methodologies
+   - Integrate soft skills naturally throughout achievements
 
-7. SEMANTIC KEYWORD MATCHING:
-   - Include synonyms and related terms
-   - Use industry-standard terminology
-   - Include certification names if mentioned
-   - Add methodology keywords (Agile, Scrum, etc.)
-   - Include soft skill variations
+5. PROJECT ACHIEVEMENT EXAMPLES:
+
+   TECHNICAL PROJECT ACHIEVEMENT (70-90 words):
+   "Led the development of the CustomerEngagement Platform, a comprehensive React.js and Node.js application serving 50,000+ daily active users, where I architected the microservices backend using Docker containers and AWS Lambda functions, implemented real-time data synchronization with PostgreSQL and Redis caching, overcame scalability challenges by designing auto-scaling infrastructure that reduced response times by 60%, and delivered the project 2 weeks ahead of schedule while maintaining 99.9% uptime and achieving a 40% increase in user engagement metrics."
+
+   LEADERSHIP ACHIEVEMENT (60-80 words):
+   "Spearheaded cross-functional collaboration initiatives by leading a team of 8 developers and 3 QA engineers through Agile development cycles, where I facilitated daily standups and sprint planning sessions, mentored junior developers on React.js best practices and code review processes, coordinated with product managers and UX designers to align technical implementation with business requirements, and successfully delivered 12 major feature releases while maintaining team productivity at 95% and reducing bug reports by 35%."
 
 CRITICAL SUCCESS FACTORS:
-- Every keyword from job description appears at least once
-- Primary keywords appear 3-5 times naturally
-- Technical skills section contains REAL technologies
-- Achievements use action verbs from job posting
-- Language matches job description tone and terminology
-- No keyword stuffing - natural integration only
+- Each project achievement must be 70-90 words with comprehensive technical details
+- Project names must be realistic and align with job description requirements
+- Include specific role, challenges, solutions, and quantified outcomes
+- Strategic achievements must be 60-80 words incorporating job description keywords
+- Technical skills must contain REAL technologies extracted from job posting
+- Maintain natural language flow while achieving optimal keyword density
+- Every technical term from job description should appear at least once
 
-Generate exactly 6 achievements for ALL ${workExperiences.length} work experiences.
+Generate exactly 7 achievements for ALL ${workExperiences.length} work experiences.
 
-Return ONLY valid JSON without markdown formatting:
+IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. The response must start with { and end with }.
 
 {
-  "professionalTitle": "[Exact Job Title from Posting] | [Primary Tech Stack from JD]",
-  "professionalSummary": "[4-5 sentences, 120-150 words, incorporating 15-20 keywords from job description naturally, starting with experience level and exact job title, including top technical skills, industry domain, and value proposition using job posting language]",
+  "professionalTitle": "[Exact Job Title from Posting] | [Primary Tech Stack from Job Description]",
+  "professionalSummary": "[5-6 comprehensive sentences, 150-200 words total, incorporating 20-25 keywords from job description naturally, starting with experience level and exact role alignment, highlighting top technical skills, including industry domain, and ending with value proposition using job posting language]",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "achievements": [
-        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
-        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
-        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
-        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
-        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
-        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
+        "[PROJECT ACHIEVEMENT 1: 70-90 words describing a realistic project name that aligns with job description, your specific technical role, the challenge faced, detailed solution using technologies from job posting, and quantified business impact]",
+        "[PROJECT ACHIEVEMENT 2: 70-90 words describing a different realistic project name relevant to job requirements, your technical leadership role, complex challenges overcome, comprehensive solution implementation, and measurable outcomes]",
+        "[PROJECT ACHIEVEMENT 3: 70-90 words describing another realistic project that matches job description context, your technical contributions, innovative solutions implemented, and significant business value delivered]",
+        "[LEADERSHIP ACHIEVEMENT: 60-80 words incorporating team management and soft skills from job description, including team size, collaboration methods, mentoring activities, and leadership outcomes]",
+        "[COLLABORATION ACHIEVEMENT: 60-80 words using business language from job posting, focusing on cross-functional work, stakeholder management, communication skills, and relationship building]",
+        "[PROCESS OPTIMIZATION ACHIEVEMENT: 60-80 words highlighting methodologies from job description, process improvements, efficiency gains, and innovation initiatives]",
+        "[TECHNICAL EXCELLENCE ACHIEVEMENT: 60-80 words emphasizing quality practices from job posting, code standards, best practices, continuous learning, and technical mentoring]"
       ]
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
-        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
-        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
-        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
-        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
-        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
+        "[PROJECT ACHIEVEMENT 1: 70-90 words describing a realistic project name that aligns with job description, your specific technical role, the challenge faced, detailed solution using technologies from job posting, and quantified business impact]",
+        "[PROJECT ACHIEVEMENT 2: 70-90 words describing a different realistic project name relevant to job requirements, your technical leadership role, complex challenges overcome, comprehensive solution implementation, and measurable outcomes]",
+        "[PROJECT ACHIEVEMENT 3: 70-90 words describing another realistic project that matches job description context, your technical contributions, innovative solutions implemented, and significant business value delivered]",
+        "[LEADERSHIP ACHIEVEMENT: 60-80 words incorporating team management and soft skills from job description, including team size, collaboration methods, mentoring activities, and leadership outcomes]",
+        "[COLLABORATION ACHIEVEMENT: 60-80 words using business language from job posting, focusing on cross-functional work, stakeholder management, communication skills, and relationship building]",
+        "[PROCESS OPTIMIZATION ACHIEVEMENT: 60-80 words highlighting methodologies from job description, process improvements, efficiency gains, and innovation initiatives]",
+        "[TECHNICAL EXCELLENCE ACHIEVEMENT: 60-80 words emphasizing quality practices from job posting, code standards, best practices, continuous learning, and technical mentoring]"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
     {
       "company": "${work.company}",
       "achievements": [
-        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
-        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
-        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
-        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
-        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
-        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
+        "[PROJECT ACHIEVEMENT 1: 70-90 words describing a realistic project name that aligns with job description, your specific technical role, the challenge faced, detailed solution using technologies from job posting, and quantified business impact]",
+        "[PROJECT ACHIEVEMENT 2: 70-90 words describing a different realistic project name relevant to job requirements, your technical leadership role, complex challenges overcome, comprehensive solution implementation, and measurable outcomes]",
+        "[PROJECT ACHIEVEMENT 3: 70-90 words describing another realistic project that matches job description context, your technical contributions, innovative solutions implemented, and significant business value delivered]",
+        "[LEADERSHIP ACHIEVEMENT: 60-80 words incorporating team management and soft skills from job description, including team size, collaboration methods, mentoring activities, and leadership outcomes]",
+        "[COLLABORATION ACHIEVEMENT: 60-80 words using business language from job posting, focusing on cross-functional work, stakeholder management, communication skills, and relationship building]",
+        "[PROCESS OPTIMIZATION ACHIEVEMENT: 60-80 words highlighting methodologies from job description, process improvements, efficiency gains, and innovation initiatives]",
+        "[TECHNICAL EXCELLENCE ACHIEVEMENT: 60-80 words emphasizing quality practices from job posting, code standards, best practices, continuous learning, and technical mentoring]"
       ]
     }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: [List ACTUAL languages from job description like JavaScript, Python, Java, etc.]",
-    "Frontend Technologies: [List ACTUAL frontend tools from job description like React, Angular, Vue, etc.]",
-    "Backend Technologies: [List ACTUAL backend tools from job description like Node.js, Django, Spring, etc.]",
-    "Databases: [List ACTUAL database systems from job description like PostgreSQL, MongoDB, MySQL, etc.]",
-    "Cloud Platforms: [List ACTUAL cloud services from job description like AWS, Azure, GCP, etc.]",
-    "DevOps Tools: [List ACTUAL DevOps tools from job description like Docker, Kubernetes, Jenkins, etc.]",
-    "Development Tools: [List ACTUAL development tools from job description like Git, VS Code, IntelliJ, etc.]",
-    "Testing Frameworks: [List ACTUAL testing tools from job description like Jest, Cypress, Selenium, etc.]",
-    "APIs & Integration: [List ACTUAL API technologies from job description like REST, GraphQL, WebSocket, etc.]",
-    "Monitoring & Analytics: [List ACTUAL monitoring tools from job description like New Relic, DataDog, etc.]",
-    "Security Tools: [List ACTUAL security frameworks from job description like OAuth, JWT, HTTPS, etc.]",
-    "Data Technologies: [List ACTUAL data tools from job description like Pandas, NumPy, Tableau, etc.]",
-    "Mobile Technologies: [List ACTUAL mobile tools from job description like React Native, Flutter, etc.]",
-    "Emerging Technologies: [List ACTUAL emerging tech from job description like AI/ML, Blockchain, etc.]",
-    "Methodologies: [List ACTUAL methodologies from job description like Agile, Scrum, TDD, CI/CD, etc.]"
+    "Programming Languages: [Extract and list ACTUAL programming languages mentioned in job description + relevant complementary languages]",
+    "Frontend Development: [Extract and list ACTUAL frontend frameworks and tools from job description + related technologies]",
+    "Backend Technologies: [Extract and list ACTUAL backend frameworks and tools from job description + complementary systems]",
+    "Database Systems: [Extract and list ACTUAL database technologies from job description + related data storage solutions]",
+    "Cloud Platforms: [Extract and list ACTUAL cloud services and platforms from job description + related cloud technologies]",
+    "DevOps & Infrastructure: [Extract and list ACTUAL DevOps tools and practices from job description + related automation tools]",
+    "Development Tools: [Extract and list ACTUAL development tools and IDEs from job description + related productivity tools]",
+    "Testing & Quality Assurance: [Extract and list ACTUAL testing frameworks and QA tools from job description + related testing technologies]",
+    "API Development: [Extract and list ACTUAL API technologies and integration tools from job description + related communication protocols]",
+    "Monitoring & Analytics: [Extract and list ACTUAL monitoring and analytics tools from job description + related observability platforms]",
+    "Security & Compliance: [Extract and list ACTUAL security frameworks and compliance tools from job description + related security technologies]",
+    "Data Science & Analytics: [Extract and list ACTUAL data analysis tools and frameworks from job description + related data technologies]",
+    "Mobile Development: [Extract and list ACTUAL mobile development frameworks from job description + related mobile technologies]",
+    "Emerging Technologies: [Extract and list ACTUAL emerging technologies mentioned in job description + related innovative tools]",
+    "Methodologies & Practices: [Extract and list ACTUAL development methodologies and practices from job description + related process frameworks]"
   ]
 }
 
-CRITICAL: Extract REAL technology names from the job description. Never use placeholder text. Achieve 95%+ ATS score through strategic keyword placement and natural language integration.
+CRITICAL REQUIREMENTS:
+- 3 detailed project achievements (70-90 words each) with realistic project names, specific roles, challenges, solutions, and impact
+- 4 strategic achievements (60-80 words each) incorporating keywords and soft skills from job description
+- Technical skills must contain REAL technologies extracted from job posting - NO placeholder text
+- Achieve 95%+ ATS score through comprehensive keyword integration and natural language flow
+- Every sentence must be detailed, comprehensive, and professionally written
 `
 }
 
@@ -452,15 +464,15 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS optimization specialist with 99.2% success rate. Create resumes that achieve 95%+ ATS scores through strategic keyword integration, natural language flow, and proper technical skill extraction. CRITICAL: Always extract REAL technology names from job descriptions - never use placeholder text like "[Extract from JD]" or "[List from job description]". Focus on achieving optimal keyword density (2-4%) while maintaining readability. Return ONLY valid JSON without any markdown formatting.'
+          content: 'You are an expert ATS optimization specialist and technical resume writer with 99.5% success rate. Create comprehensive, project-focused resumes that achieve 95%+ ATS scores through detailed real-world project descriptions (70-90 words each) and strategic keyword integration. CRITICAL: Always extract REAL technology names from job descriptions - never use placeholder text. Focus on creating longer, detailed sentences with comprehensive technical descriptions, specific project names, roles, challenges, and solutions. Each project achievement should be a complete story with quantified outcomes. Return ONLY valid JSON without any markdown formatting.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.3, // Lower temperature for more consistent, focused output
-      max_tokens: 4000
+      temperature: 0.4, // Slightly higher for more creative project descriptions
+      max_tokens: 4500 // Increased for longer content
     })
   })
 
@@ -491,7 +503,7 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 4000,
+      max_tokens: 4500, // Increased for longer content
       messages: [
         {
           role: 'user',
@@ -500,9 +512,10 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
 CRITICAL INSTRUCTIONS:
 - Return ONLY valid JSON without any markdown formatting, code blocks, or additional text
 - Extract REAL technology names from the job description - never use placeholder text
-- Achieve 95%+ ATS score through strategic keyword placement
-- Maintain 2-4% keyword density for optimal parsing
-- Use natural language integration to avoid keyword stuffing
+- Create detailed project achievements (70-90 words each) with comprehensive technical descriptions
+- Include realistic project names, specific roles, challenges, solutions, and quantified outcomes
+- Strategic achievements should be 60-80 words with natural keyword integration
+- Achieve 95%+ ATS score through comprehensive keyword placement and detailed content
 - The response must start with { and end with }`
         }
       ]
