@@ -1,12 +1,12 @@
 /*
-  # Natural ATS Resume Generation for ALL Work Experiences
+  # Comprehensive Keyword-Rich Resume Generation
 
-  This edge function creates natural, professional resumes by:
-  1. Generating 2 detailed real-world projects per work experience (natural sentences)
-  2. Adding 3 strategic achievements per company (natural professional language)
-  3. Extensive keyword integration from job descriptions
-  4. Comprehensive technical skills extraction
-  5. Optimized token usage for GPT-3.5 and Anthropic limits
+  This edge function creates detailed, keyword-optimized resumes by:
+  1. Generating 2 comprehensive real-world projects (80-120 words each)
+  2. Adding 3 strategic achievements covering collaboration, problem-solving (60-80 words each)
+  3. Maximum keyword integration from job descriptions
+  4. Comprehensive technical skills extraction with similar technologies
+  5. Optimized for GPT-3.5 and Anthropic token limits
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with natural language prompt
+    // Generate AI content with comprehensive keyword-rich prompt
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure ALL companies get achievements
@@ -227,7 +227,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createNaturalPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createComprehensivePrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -245,18 +245,18 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createNaturalPrompt(
+function createComprehensivePrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
-  return `You are an expert resume writer creating a natural, professional ATS-optimized resume. Write in natural language - NO placeholder text, NO brackets, NO instructions in the output.
+  return `You are an expert ATS resume writer creating comprehensive, keyword-rich content. Write detailed, professional sentences that maximize keyword integration from the job description.
 
-JOB DESCRIPTION:
+JOB DESCRIPTION TO ANALYZE:
 ${jobDescription}
 
-CANDIDATE PROFILE:
+CANDIDATE INFO:
 Name: ${profile.name}
 Contact: ${profile.email} | ${profile.phone} | ${profile.location}
 
@@ -266,73 +266,83 @@ ${workExperiences.map((work, i) => `${i + 1}. ${work.company} - ${work.position}
 EDUCATION:
 ${educations.map(edu => `${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})`).join('\n')}
 
-Create a professional resume with:
+REQUIREMENTS:
+1. PROFESSIONAL TITLE: Use exact job title + primary technologies from job description
+2. PROFESSIONAL SUMMARY: 5-6 comprehensive sentences (150-200 words) with maximum keyword density
+3. WORK ACHIEVEMENTS: For each company, create exactly 5 achievements:
+   - Achievement 1: Real-world project (80-120 words) - detailed project with specific technologies, challenges, solutions, and quantified results
+   - Achievement 2: Another real-world project (80-120 words) - different project with comprehensive technical details and business impact
+   - Achievement 3: Technical excellence/problem-solving (60-80 words) - architecture, code quality, innovation, technical leadership
+   - Achievement 4: Collaboration/team management (60-80 words) - cross-functional work, leadership, mentoring, stakeholder management
+   - Achievement 5: Process improvement/strategic initiatives (60-80 words) - methodologies, efficiency, optimization, strategic contributions
 
-1. PROFESSIONAL TITLE: Use exact job title from posting + key technologies
-2. PROFESSIONAL SUMMARY: 4-5 natural sentences highlighting experience, skills, and value proposition using keywords from job description
-3. WORK ACHIEVEMENTS: For EACH company, write exactly 5 natural achievements:
-   - 2 detailed project achievements (describe real projects with specific technologies, challenges solved, and results)
-   - 3 strategic achievements (leadership, collaboration, technical excellence)
-4. TECHNICAL SKILLS: Extract ALL technologies from job description and organize into categories
+4. TECHNICAL SKILLS: Extract ALL technologies from job description + add related/similar technologies. Organize into 12-15 comprehensive categories.
 
-CRITICAL REQUIREMENTS:
-- Write in natural, professional language
-- NO placeholder text or brackets
-- Include specific project names and technologies
-- Use keywords from job description naturally
+CRITICAL INSTRUCTIONS:
+- Write natural, professional sentences (NO placeholder text, NO brackets)
+- Pack maximum keywords from job description into each sentence
+- Create realistic project names that align with job requirements
+- Include specific technologies, frameworks, and methodologies from job posting
 - Generate achievements for ALL ${workExperiences.length} companies
-- Keep within token limits
+- Use quantified results and business impact metrics
+- Maintain professional tone while maximizing keyword density
 
-Return ONLY this JSON structure with natural content:
+EXAMPLE PROJECT ACHIEVEMENT (80-120 words):
+"Architected and led the development of the CustomerEngagement Platform using React.js, Node.js, and PostgreSQL, serving over 50,000 daily active users across multiple geographic regions, where I implemented microservices architecture with Docker containers and Kubernetes orchestration, integrated real-time data synchronization using Redis caching and WebSocket connections, collaborated with cross-functional teams including product managers, UX designers, and QA engineers through Agile development methodologies, overcame scalability challenges by designing auto-scaling infrastructure on AWS EC2 with load balancing, and delivered the project 2 weeks ahead of schedule while achieving 99.9% uptime, 40% increase in user engagement metrics, and 60% reduction in page load times."
+
+Return ONLY this JSON structure:
 
 {
-  "professionalTitle": "Natural job title with key technologies",
-  "professionalSummary": "Natural 4-5 sentence summary with keywords integrated naturally",
+  "professionalTitle": "Exact job title from posting with key technologies",
+  "professionalSummary": "5-6 comprehensive sentences (150-200 words) integrating maximum keywords from job description naturally while highlighting experience, technical expertise, industry knowledge, and value proposition",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "achievements": [
-        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
-        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
-        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
-        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
-        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+        "Comprehensive 80-120 word sentence describing a specific real-world project you architected/led, including project name, technologies used from job description, team collaboration, challenges overcome, technical solutions implemented, and quantified business results achieved",
+        "Detailed 80-120 word sentence about another significant project highlighting different technologies from job posting, your technical leadership role, complex problem-solving, innovative solutions, cross-functional collaboration, and measurable impact on business metrics",
+        "Professional 60-80 word sentence emphasizing technical excellence, code quality, architecture decisions, innovation, best practices, technical mentoring, or advanced problem-solving skills that align with job requirements",
+        "Comprehensive 60-80 word sentence showcasing collaboration, team leadership, stakeholder management, cross-functional coordination, communication skills, or project management abilities mentioned in job description",
+        "Detailed 60-80 word sentence highlighting process improvements, strategic initiatives, methodology implementation, efficiency optimization, or innovation that demonstrates value-add capabilities from job posting"
       ]
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
-        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
-        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
-        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
-        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+        "Comprehensive 80-120 word sentence describing a specific real-world project you architected/led, including project name, technologies used from job description, team collaboration, challenges overcome, technical solutions implemented, and quantified business results achieved",
+        "Detailed 80-120 word sentence about another significant project highlighting different technologies from job posting, your technical leadership role, complex problem-solving, innovative solutions, cross-functional collaboration, and measurable impact on business metrics",
+        "Professional 60-80 word sentence emphasizing technical excellence, code quality, architecture decisions, innovation, best practices, technical mentoring, or advanced problem-solving skills that align with job requirements",
+        "Comprehensive 60-80 word sentence showcasing collaboration, team leadership, stakeholder management, cross-functional coordination, communication skills, or project management abilities mentioned in job description",
+        "Detailed 60-80 word sentence highlighting process improvements, strategic initiatives, methodology implementation, efficiency optimization, or innovation that demonstrates value-add capabilities from job posting"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
     {
       "company": "${work.company}",
       "achievements": [
-        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
-        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
-        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
-        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
-        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+        "Comprehensive 80-120 word sentence describing a specific real-world project you architected/led, including project name, technologies used from job description, team collaboration, challenges overcome, technical solutions implemented, and quantified business results achieved",
+        "Detailed 80-120 word sentence about another significant project highlighting different technologies from job posting, your technical leadership role, complex problem-solving, innovative solutions, cross-functional collaboration, and measurable impact on business metrics",
+        "Professional 60-80 word sentence emphasizing technical excellence, code quality, architecture decisions, innovation, best practices, technical mentoring, or advanced problem-solving skills that align with job requirements",
+        "Comprehensive 60-80 word sentence showcasing collaboration, team leadership, stakeholder management, cross-functional coordination, communication skills, or project management abilities mentioned in job description",
+        "Detailed 60-80 word sentence highlighting process improvements, strategic initiatives, methodology implementation, efficiency optimization, or innovation that demonstrates value-add capabilities from job posting"
       ]
     }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: List of actual languages from job description",
-    "Frontend Technologies: List of actual frontend tools from job description",
-    "Backend Technologies: List of actual backend tools from job description",
-    "Database Systems: List of actual database technologies from job description",
-    "Cloud Platforms: List of actual cloud services from job description",
-    "DevOps Tools: List of actual DevOps technologies from job description",
-    "Development Tools: List of actual development tools from job description",
-    "Testing Frameworks: List of actual testing tools from job description",
-    "API Technologies: List of actual API technologies from job description",
-    "Monitoring Tools: List of actual monitoring tools from job description",
-    "Security Technologies: List of actual security tools from job description",
-    "Methodologies: List of actual methodologies from job description"
+    "Programming Languages: Extract ALL programming languages from job description + add related languages (e.g., if JavaScript mentioned, add TypeScript, ES6+)",
+    "Frontend Development: Extract ALL frontend technologies + add related frameworks and libraries",
+    "Backend Technologies: Extract ALL backend frameworks + add related server technologies and APIs",
+    "Database Systems: Extract ALL database technologies + add related data storage and management tools",
+    "Cloud Platforms: Extract ALL cloud services + add related cloud technologies and services",
+    "DevOps & Infrastructure: Extract ALL DevOps tools + add related automation and deployment technologies",
+    "Development Tools: Extract ALL development tools + add related IDEs, version control, and productivity tools",
+    "Testing & Quality Assurance: Extract ALL testing frameworks + add related QA tools and methodologies",
+    "API Development: Extract ALL API technologies + add related integration and communication protocols",
+    "Monitoring & Analytics: Extract ALL monitoring tools + add related observability and analytics platforms",
+    "Security & Compliance: Extract ALL security frameworks + add related security tools and practices",
+    "Data Science & Analytics: Extract ALL data tools + add related analytics and visualization technologies",
+    "Mobile Development: Extract ALL mobile technologies + add related mobile frameworks and tools",
+    "Emerging Technologies: Extract ALL emerging tech + add related innovative tools and platforms",
+    "Methodologies & Practices: Extract ALL methodologies + add related development practices and frameworks"
   ]
 }`
 }
@@ -364,15 +374,15 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are a professional resume writer. Create natural, compelling resume content without any placeholder text, brackets, or instructions. Write actual achievements and project descriptions that sound professional and realistic. Extract real technologies from job descriptions and integrate them naturally into achievements.'
+          content: 'You are an expert ATS resume writer specializing in comprehensive, keyword-rich content. Create detailed professional achievements (80-120 words for projects, 60-80 words for strategic achievements) that maximize keyword integration from job descriptions. Write natural, compelling sentences with specific technologies, quantified results, and business impact. NO placeholder text, NO brackets, NO instructions in output.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 3000
+      temperature: 0.6,
+      max_tokens: 3500
     })
   })
 
@@ -403,13 +413,13 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 3000,
+      max_tokens: 3500,
       messages: [
         {
           role: 'user',
           content: `${prompt}
 
-Write natural, professional resume content. NO placeholder text, NO brackets, NO instructions in the output. Create realistic project descriptions and achievements that sound professional and compelling. Return ONLY valid JSON.`
+CRITICAL: Write comprehensive, detailed sentences that pack maximum keywords from job description. First 2 achievements per company must be 80-120 words describing real projects. Next 3 achievements must be 60-80 words covering collaboration, problem-solving, and technical excellence. Extract ALL technologies from job description and add similar/related technologies to technical skills. Return ONLY valid JSON with natural, professional content.`
         }
       ]
     })
