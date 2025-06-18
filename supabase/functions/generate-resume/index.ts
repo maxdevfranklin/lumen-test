@@ -1,12 +1,12 @@
 /*
-  # Enhanced ATS Resume Generation for ALL Work Experiences
+  # Natural ATS Resume Generation for ALL Work Experiences
 
-  This edge function creates ATS-optimized resumes by:
-  1. Generating exactly 2 detailed real-world projects per ALL work experiences (80-120 words each)
-  2. Adding 3 comprehensive strategic achievements for ALL companies (60-90 words each)
-  3. Extensive keyword extraction and natural integration from job descriptions
-  4. Comprehensive technical skills with ALL keywords from job description
-  5. Optimized token usage to stay within GPT-3.5 and Anthropic limits
+  This edge function creates natural, professional resumes by:
+  1. Generating 2 detailed real-world projects per work experience (natural sentences)
+  2. Adding 3 strategic achievements per company (natural professional language)
+  3. Extensive keyword integration from job descriptions
+  4. Comprehensive technical skills extraction
+  5. Optimized token usage for GPT-3.5 and Anthropic limits
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with enhanced prompt
+    // Generate AI content with natural language prompt
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure ALL companies get achievements
@@ -227,7 +227,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createOptimizedPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createNaturalPrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -245,78 +245,94 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createOptimizedPrompt(
+function createNaturalPrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
-  // Create dynamic work experience sections for ALL companies
-  const workExperiencePrompt = workExperiences.map((work, index) => `
-    {
-      "company": "${work.company}",
-      "achievements": [
-        "[PROJECT 1: 80-120 words describing realistic project name aligned with job requirements, your specific technical role, complex challenges, comprehensive solution using job description technologies, quantified impact, naturally integrating 8-12 keywords]",
-        "[PROJECT 2: 80-120 words describing different realistic project relevant to job requirements, your technical leadership role, innovative challenges, detailed solution architecture, measurable outcomes, incorporating additional 8-12 keywords naturally]",
-        "[TECHNICAL EXCELLENCE: 60-90 words focusing on code quality, best practices, architecture, technical mentoring, continuous learning, quality assurance using job description terminology]",
-        "[COLLABORATION & LEADERSHIP: 60-90 words emphasizing team management, cross-functional collaboration, stakeholder communication, mentoring, project coordination using business language from job posting]",
-        "[PROBLEM-SOLVING & INNOVATION: 60-90 words highlighting process optimization, efficiency improvements, innovative solutions, strategic thinking, automation using methodologies from job description]"
-      ]
-    }${index < workExperiences.length - 1 ? ',' : ''}`).join('')
+  return `You are an expert resume writer creating a natural, professional ATS-optimized resume. Write in natural language - NO placeholder text, NO brackets, NO instructions in the output.
 
-  return `Create comprehensive ATS-optimized resume achieving 95%+ score with extensive keyword matching for ALL work experiences.
-
-JOB DESCRIPTION TO ANALYZE:
+JOB DESCRIPTION:
 ${jobDescription}
 
-PROFILE: ${profile.name} | ${profile.email} | ${profile.phone} | ${profile.location}
+CANDIDATE PROFILE:
+Name: ${profile.name}
+Contact: ${profile.email} | ${profile.phone} | ${profile.location}
 
-WORK EXPERIENCES (Generate for ALL ${workExperiences.length} companies):
+WORK HISTORY:
 ${workExperiences.map((work, i) => `${i + 1}. ${work.company} - ${work.position} (${work.start_date} to ${work.is_current ? 'Present' : work.end_date})`).join('\n')}
 
 EDUCATION:
 ${educations.map(edu => `${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})`).join('\n')}
 
-REQUIREMENTS:
+Create a professional resume with:
 
-1. PROFESSIONAL TITLE & SUMMARY:
-- Title: Use EXACT job title + primary tech stack from job description
-- Summary: 5-6 sentences, 160-200 words, integrate 25-30 keywords naturally
-- Include experience level, domain expertise, leadership experience, value proposition
+1. PROFESSIONAL TITLE: Use exact job title from posting + key technologies
+2. PROFESSIONAL SUMMARY: 4-5 natural sentences highlighting experience, skills, and value proposition using keywords from job description
+3. WORK ACHIEVEMENTS: For EACH company, write exactly 5 natural achievements:
+   - 2 detailed project achievements (describe real projects with specific technologies, challenges solved, and results)
+   - 3 strategic achievements (leadership, collaboration, technical excellence)
+4. TECHNICAL SKILLS: Extract ALL technologies from job description and organize into categories
 
-2. ACHIEVEMENT STRUCTURE (5 per ALL work experiences):
-- 2 REAL-WORLD PROJECTS (80-120 words each): Realistic project names, technical roles, challenges, solutions, quantified impact, 8-12 keywords each
-- 3 STRATEGIC ACHIEVEMENTS (60-90 words each): Technical Excellence, Collaboration & Leadership, Problem-Solving & Innovation
+CRITICAL REQUIREMENTS:
+- Write in natural, professional language
+- NO placeholder text or brackets
+- Include specific project names and technologies
+- Use keywords from job description naturally
+- Generate achievements for ALL ${workExperiences.length} companies
+- Keep within token limits
 
-3. COMPREHENSIVE TECHNICAL SKILLS:
-- Extract ALL technical terms, frameworks, tools, methodologies from job description
-- Use EXACT terminology and spelling from job posting
-- Group into 12 logical categories with comprehensive coverage
-- Include complementary technologies expected for this role
-- NO placeholder text - only real technology names
-
-CRITICAL: Generate achievements for ALL ${workExperiences.length} work experiences. Each company must have exactly 5 achievements.
-
-Return ONLY valid JSON:
+Return ONLY this JSON structure with natural content:
 
 {
-  "professionalTitle": "[Exact job title from posting] | [Primary tech stack from job description]",
-  "professionalSummary": "[5-6 comprehensive sentences, 160-200 words, incorporating 25-30 keywords naturally from job description, highlighting experience level, technical expertise, leadership experience, domain knowledge, and value proposition using job posting language]",
-  "workExperiences": [${workExperiencePrompt}
+  "professionalTitle": "Natural job title with key technologies",
+  "professionalSummary": "Natural 4-5 sentence summary with keywords integrated naturally",
+  "workExperiences": [
+    {
+      "company": "${workExperiences[0]?.company || 'Company1'}",
+      "achievements": [
+        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
+        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
+        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
+        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
+        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+      ]
+    }${workExperiences.length > 1 ? `,
+    {
+      "company": "${workExperiences[1]?.company || 'Company2'}",
+      "achievements": [
+        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
+        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
+        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
+        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
+        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+      ]
+    }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
+    {
+      "company": "${work.company}",
+      "achievements": [
+        "Natural sentence describing a specific project you led, technologies used, challenges overcome, and quantified results achieved",
+        "Natural sentence about another project highlighting your technical skills, problem-solving abilities, and business impact delivered",
+        "Natural sentence about technical excellence, code quality, mentoring, or architecture decisions you made",
+        "Natural sentence about collaboration, leadership, team management, or cross-functional work you performed",
+        "Natural sentence about process improvements, innovation, or strategic initiatives you drove"
+      ]
+    }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: [Extract ALL programming languages from job description + complementary languages like JavaScript, Python, Java, TypeScript, C#, Go, Rust, etc.]",
-    "Frontend Development: [Extract ALL frontend frameworks and tools from job description + related technologies like React, Vue.js, Angular, HTML5, CSS3, SASS, Bootstrap, Material-UI, etc.]",
-    "Backend Technologies: [Extract ALL backend frameworks and architectures from job description + complementary systems like Node.js, Express.js, Django, Spring Boot, .NET Core, FastAPI, etc.]",
-    "Database Systems: [Extract ALL database technologies from job description + related solutions like PostgreSQL, MongoDB, MySQL, Redis, Elasticsearch, DynamoDB, etc.]",
-    "Cloud Platforms: [Extract ALL cloud services from job description + related technologies like AWS, Azure, Google Cloud, Docker, Kubernetes, Terraform, etc.]",
-    "DevOps & Infrastructure: [Extract ALL DevOps tools from job description + automation tools like Jenkins, GitLab CI, GitHub Actions, Ansible, Chef, Puppet, etc.]",
-    "Development Tools: [Extract ALL development tools from job description + productivity tools like Git, VS Code, IntelliJ, Jira, Confluence, Slack, etc.]",
-    "Testing & Quality Assurance: [Extract ALL testing frameworks from job description + related testing technologies like Jest, Cypress, Selenium, JUnit, PyTest, etc.]",
-    "API Development: [Extract ALL API technologies from job description + related solutions like REST, GraphQL, gRPC, OpenAPI, Postman, Swagger, etc.]",
-    "Monitoring & Analytics: [Extract ALL monitoring tools from job description + observability platforms like Prometheus, Grafana, New Relic, DataDog, Splunk, etc.]",
-    "Security & Compliance: [Extract ALL security frameworks from job description + related security technologies like OAuth, JWT, SSL/TLS, OWASP, SOC2, etc.]",
-    "Methodologies & Practices: [Extract ALL development methodologies from job description + related frameworks like Agile, Scrum, Kanban, DevOps, TDD, CI/CD, etc.]"
+    "Programming Languages: List of actual languages from job description",
+    "Frontend Technologies: List of actual frontend tools from job description",
+    "Backend Technologies: List of actual backend tools from job description",
+    "Database Systems: List of actual database technologies from job description",
+    "Cloud Platforms: List of actual cloud services from job description",
+    "DevOps Tools: List of actual DevOps technologies from job description",
+    "Development Tools: List of actual development tools from job description",
+    "Testing Frameworks: List of actual testing tools from job description",
+    "API Technologies: List of actual API technologies from job description",
+    "Monitoring Tools: List of actual monitoring tools from job description",
+    "Security Technologies: List of actual security tools from job description",
+    "Methodologies: List of actual methodologies from job description"
   ]
 }`
 }
@@ -348,15 +364,15 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS resume optimization specialist. Create comprehensive resumes with exactly 2 detailed project achievements (80-120 words each) and 3 strategic achievements (60-90 words each) for ALL work experiences. Extract ALL real technology names from job descriptions and integrate them naturally. Generate achievements for every single company in work history. Return ONLY valid JSON without markdown formatting.'
+          content: 'You are a professional resume writer. Create natural, compelling resume content without any placeholder text, brackets, or instructions. Write actual achievements and project descriptions that sound professional and realistic. Extract real technologies from job descriptions and integrate them naturally into achievements.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.3,
-      max_tokens: 3500 // Optimized to stay within GPT-3.5 limits
+      temperature: 0.7,
+      max_tokens: 3000
     })
   })
 
@@ -387,21 +403,13 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 3500, // Optimized to stay within Anthropic limits
+      max_tokens: 3000,
       messages: [
         {
           role: 'user',
           content: `${prompt}
 
-CRITICAL INSTRUCTIONS:
-- Return ONLY valid JSON without markdown formatting or code blocks
-- Extract ALL real technology names from job description - never use placeholder text
-- Generate exactly 5 achievements for EVERY work experience (2 projects + 3 strategic)
-- Create comprehensive project achievements (80-120 words each) with realistic project names
-- Include strategic achievements (60-90 words each) for technical excellence, collaboration, and innovation
-- Integrate 25-30 keywords naturally throughout all sections
-- Technical skills must contain ALL technologies from job description
-- Response must start with { and end with }`
+Write natural, professional resume content. NO placeholder text, NO brackets, NO instructions in the output. Create realistic project descriptions and achievements that sound professional and compelling. Return ONLY valid JSON.`
         }
       ]
     })
