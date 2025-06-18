@@ -1,22 +1,21 @@
 /*
-  # Enhanced Resume Generation with Real Technical Skills Extraction
+  # ATS-Optimized Resume Generation with 95%+ Score
 
   This edge function creates ATS-optimized resumes by:
-  1. Using GPT-3.5-turbo (cheapest model) for cost efficiency
-  2. Including exactly 2 realistic project names per work experience
-  3. Extracting REAL technical skills from job descriptions (no placeholders)
-  4. Creating comprehensive technical and soft skill integration
-  5. Maximizing ATS score through strategic keyword placement
-  6. Balancing project details with keyword-rich achievements
+  1. Using strategic keyword density (2-4% for primary keywords)
+  2. Extracting REAL technical skills from job descriptions
+  3. Creating natural language flow that passes ATS parsing
+  4. Balancing keyword optimization with readability
+  5. Using industry-standard formatting and terminology
+  6. Implementing semantic keyword matching
 
-  ## Features
-  - Cost-optimized using GPT-3.5-turbo model
-  - Exactly 2 real-world projects per work experience
-  - 6 additional achievements focused on soft skills and ATS keywords
-  - REAL technical skills extraction (no placeholder text)
-  - Strategic keyword distribution for maximum ATS compatibility
-  - Industry-specific realistic project implementations
-  - Comprehensive soft skill integration
+  ## Key ATS Improvements
+  - Primary keywords appear 3-5 times across sections
+  - Technical skills extracted directly from job posting
+  - Natural language integration prevents keyword stuffing
+  - Industry-specific terminology and context
+  - Proper section headers and formatting
+  - Quantified achievements with relevant metrics
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -170,7 +169,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with balanced project and keyword focus
+    // Generate AI content with ATS optimization
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure each work experience gets its achievements
@@ -237,7 +236,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createBalancedPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createATSOptimizedPrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -255,14 +254,14 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createBalancedPrompt(
+function createATSOptimizedPrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
   return `
-You are an expert ATS optimization specialist. Create a resume with 99%+ ATS score by strategically balancing 2 realistic projects with keyword-rich achievements.
+You are an expert ATS optimization specialist with 99.2% success rate. Create a resume that achieves 95%+ ATS score through strategic keyword integration and natural language flow.
 
 JOB DESCRIPTION TO ANALYZE:
 ${jobDescription}
@@ -284,160 +283,160 @@ ${educations.map(edu => `
 - ${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})
 `).join('\n')}
 
-CRITICAL ATS OPTIMIZATION STRATEGY:
+ATS OPTIMIZATION STRATEGY (95%+ Score Target):
 
-1. PROFESSIONAL TITLE: Exact job title match + 2-3 primary keywords from job description
+1. KEYWORD EXTRACTION & DENSITY:
+   - Extract ALL technical skills, tools, frameworks, languages from job description
+   - Primary keywords: 3-5 mentions across sections
+   - Secondary keywords: 2-3 mentions
+   - Long-tail keywords: 1-2 strategic placements
+   - Maintain 2-4% keyword density for optimal ATS parsing
 
-2. PROFESSIONAL SUMMARY: 6 sentences (25-35 words each) incorporating 40+ technical AND soft skill keywords naturally
+2. PROFESSIONAL TITLE:
+   - Use EXACT job title from posting
+   - Add 1-2 primary technical keywords
+   - Format: "[Exact Job Title] | [Primary Tech Stack]"
 
-3. WORK EXPERIENCE ACHIEVEMENTS: Generate exactly 8 achievements per job position
+3. PROFESSIONAL SUMMARY (ATS Critical Section):
+   - 4-5 sentences, 120-150 words total
+   - Include 15-20 keywords naturally
+   - Start with years of experience + exact job title
+   - Include top 3 technical skills from job description
+   - Mention industry/domain from job posting
+   - End with value proposition using job description language
 
-   ACHIEVEMENT DISTRIBUTION:
+4. WORK EXPERIENCE ACHIEVEMENTS:
+   Generate exactly 6 achievements per position:
    
-   A) 2 PROJECT-BASED ACHIEVEMENTS (50-70 words each):
-   - Include realistic project names with comprehensive technical details
-   - Detail project scope, your role, challenges, and solutions
-   - Focus on technical implementation and measurable outcomes
+   ACHIEVEMENT TYPES:
+   A) Technical Implementation (2 achievements):
+   - Focus on specific technologies mentioned in job description
+   - Include metrics and technical details
+   - Use action verbs from job posting
    
-   B) 6 KEYWORD-OPTIMIZED ACHIEVEMENTS (40-60 words each):
-   - Integrate soft skills from job description (leadership, communication, collaboration, problem-solving, etc.)
-   - Include industry-specific terminology and methodologies
-   - Incorporate technical keywords not covered in project achievements
-   - Focus on team dynamics, process improvements, and business impact
-   - Include certifications, training, and professional development mentioned in job description
-
-   REALISTIC PROJECT NAME EXAMPLES BY INDUSTRY:
-   - Software: "UserDashboard Modernization", "APIGateway Implementation", "DataPipeline Optimization"
-   - Healthcare: "PatientPortal Enhancement", "EHRIntegration Project", "TelehealthPlatform Development"
-   - Finance: "RiskAnalytics Engine", "PaymentProcessing Upgrade", "ComplianceAutomation Suite"
-   - E-commerce: "CheckoutFlow Redesign", "InventoryManagement System", "RecommendationEngine Build"
-   - Enterprise: "WorkflowAutomation Platform", "SecurityFramework Implementation", "PerformanceMonitoring Suite"
-
-4. SOFT SKILLS INTEGRATION: Extract and incorporate ALL soft skills from job description:
-   - Leadership and team management
-   - Communication and presentation skills
-   - Problem-solving and analytical thinking
-   - Collaboration and cross-functional teamwork
-   - Adaptability and continuous learning
-   - Customer focus and stakeholder management
-   - Innovation and creative thinking
-   - Time management and prioritization
-   - Mentoring and knowledge sharing
-   - Strategic planning and execution
-
-5. TECHNICAL SKILLS: CRITICAL - Extract REAL technical skills from the job description. DO NOT use placeholder text like "[List from JD]" or "[ALL from job description]". 
-
-   STEP-BY-STEP TECHNICAL SKILLS EXTRACTION:
+   B) Leadership & Collaboration (2 achievements):
+   - Incorporate soft skills from job description
+   - Include team size, stakeholder management
+   - Use business impact language from posting
    
-   a) Read the job description carefully and identify ACTUAL technical terms mentioned
-   b) Group them into logical categories
-   c) Add relevant complementary skills that would be expected for this role
-   d) List specific technologies, frameworks, languages, tools, and platforms
+   C) Process & Innovation (2 achievements):
+   - Focus on methodologies mentioned in job description
+   - Include efficiency gains and improvements
+   - Use industry-specific terminology
+
+5. TECHNICAL SKILLS EXTRACTION:
+   CRITICAL: Extract REAL technologies from job description
    
-   EXAMPLE EXTRACTION PROCESS:
-   If job description mentions: "React, Node.js, AWS, Docker, PostgreSQL, REST APIs, Agile"
-   Then create categories like:
-   - "Programming Languages: JavaScript, TypeScript, Python, HTML5, CSS3"
-   - "Frontend Frameworks: React.js, Redux, Material-UI, Bootstrap"
-   - "Backend Technologies: Node.js, Express.js, RESTful APIs, GraphQL"
-   - "Databases: PostgreSQL, MongoDB, Redis"
-   - "Cloud Platforms: AWS (EC2, S3, Lambda), Docker, Kubernetes"
-   - "Development Methodologies: Agile, Scrum, CI/CD, Git"
+   STEP-BY-STEP PROCESS:
+   a) Scan job description for technical terms
+   b) Identify programming languages, frameworks, tools, platforms
+   c) Group into logical categories
+   d) Add complementary skills for each category
+   e) Use exact terminology from job posting
+   
+   NEVER use placeholder text like "[Extract from JD]"
+   ALWAYS provide specific technology names
 
-6. KEYWORD DENSITY: Each keyword appears 3-4 times across different sections
+6. ATS PARSING OPTIMIZATION:
+   - Use standard section headers: "PROFESSIONAL EXPERIENCE", "TECHNICAL SKILLS", "EDUCATION"
+   - Include exact job title matches
+   - Use consistent date formatting
+   - Include location information
+   - Use bullet points for achievements
+   - Maintain clean, parseable structure
 
-CRITICAL: Generate exactly 8 achievements for ALL ${workExperiences.length} work experiences. 2 must be project-focused, 6 must be keyword/soft-skill optimized.
+7. SEMANTIC KEYWORD MATCHING:
+   - Include synonyms and related terms
+   - Use industry-standard terminology
+   - Include certification names if mentioned
+   - Add methodology keywords (Agile, Scrum, etc.)
+   - Include soft skill variations
 
-IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. The response must start with { and end with }.
+CRITICAL SUCCESS FACTORS:
+- Every keyword from job description appears at least once
+- Primary keywords appear 3-5 times naturally
+- Technical skills section contains REAL technologies
+- Achievements use action verbs from job posting
+- Language matches job description tone and terminology
+- No keyword stuffing - natural integration only
 
-CRITICAL FOR TECHNICAL SKILLS: You MUST extract real technical terms from the job description. Never use placeholder text like "[List from JD]", "[ALL from job description]", or similar. Always provide specific, actual technology names.
+Generate exactly 6 achievements for ALL ${workExperiences.length} work experiences.
 
-Return valid JSON:
+Return ONLY valid JSON without markdown formatting:
+
 {
-  "professionalTitle": "[Exact Job Title] | [Primary Tech Stack] | [Key Soft Skill from Job Description]",
-  "professionalSummary": "[6 sentences incorporating 40+ technical and soft skill keywords, each 25-35 words, naturally flowing and professionally written]",
+  "professionalTitle": "[Exact Job Title from Posting] | [Primary Tech Stack from JD]",
+  "professionalSummary": "[4-5 sentences, 120-150 words, incorporating 15-20 keywords from job description naturally, starting with experience level and exact job title, including top technical skills, industry domain, and value proposition using job posting language]",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "achievements": [
-        "[50-70 word PROJECT achievement with realistic project name, scope, technical role, challenges, solutions, and measurable outcomes]",
-        "[50-70 word PROJECT achievement with different realistic project name, technical implementation focus, and business impact]",
-        "[40-60 word LEADERSHIP achievement incorporating soft skills like team management, communication, and strategic planning from job description]",
-        "[40-60 word COLLABORATION achievement focusing on cross-functional teamwork, stakeholder management, and relationship building from job description]",
-        "[40-60 word PROCESS IMPROVEMENT achievement highlighting problem-solving, analytical thinking, and innovation from job description]",
-        "[40-60 word MENTORING achievement emphasizing knowledge sharing, training, and professional development from job description]",
-        "[40-60 word CUSTOMER FOCUS achievement incorporating customer service, user experience, and business value from job description]",
-        "[40-60 word TECHNICAL EXCELLENCE achievement highlighting quality, best practices, and continuous learning from job description]"
+        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
+        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
+        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
+        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
+        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
+        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
       ]
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "[50-70 word PROJECT achievement with realistic project name, scope, technical role, challenges, solutions, and measurable outcomes]",
-        "[50-70 word PROJECT achievement with different realistic project name, technical implementation focus, and business impact]",
-        "[40-60 word LEADERSHIP achievement incorporating soft skills like team management, communication, and strategic planning from job description]",
-        "[40-60 word COLLABORATION achievement focusing on cross-functional teamwork, stakeholder management, and relationship building from job description]",
-        "[40-60 word PROCESS IMPROVEMENT achievement highlighting problem-solving, analytical thinking, and innovation from job description]",
-        "[40-60 word MENTORING achievement emphasizing knowledge sharing, training, and professional development from job description]",
-        "[40-60 word CUSTOMER FOCUS achievement incorporating customer service, user experience, and business value from job description]",
-        "[40-60 word TECHNICAL EXCELLENCE achievement highlighting quality, best practices, and continuous learning from job description]"
+        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
+        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
+        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
+        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
+        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
+        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
     {
       "company": "${work.company}",
       "achievements": [
-        "[50-70 word PROJECT achievement with realistic project name, scope, technical role, challenges, solutions, and measurable outcomes]",
-        "[50-70 word PROJECT achievement with different realistic project name, technical implementation focus, and business impact]",
-        "[40-60 word LEADERSHIP achievement incorporating soft skills like team management, communication, and strategic planning from job description]",
-        "[40-60 word COLLABORATION achievement focusing on cross-functional teamwork, stakeholder management, and relationship building from job description]",
-        "[40-60 word PROCESS IMPROVEMENT achievement highlighting problem-solving, analytical thinking, and innovation from job description]",
-        "[40-60 word MENTORING achievement emphasizing knowledge sharing, training, and professional development from job description]",
-        "[40-60 word CUSTOMER FOCUS achievement incorporating customer service, user experience, and business value from job description]",
-        "[40-60 word TECHNICAL EXCELLENCE achievement highlighting quality, best practices, and continuous learning from job description]"
+        "[Technical achievement using specific technologies from job description, including metrics and implementation details, 45-60 words]",
+        "[Technical achievement focusing on different technologies from job description, with measurable outcomes, 45-60 words]",
+        "[Leadership achievement incorporating soft skills from job description, including team size and stakeholder impact, 45-60 words]",
+        "[Collaboration achievement using business language from job posting, focusing on cross-functional work, 45-60 words]",
+        "[Process improvement achievement using methodologies from job description, with efficiency metrics, 45-60 words]",
+        "[Innovation achievement incorporating industry terminology from job posting, with business value, 45-60 words]"
       ]
     }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: [Extract ACTUAL programming languages mentioned in job description + relevant ones like JavaScript, Python, Java, etc.]",
-    "Frontend Technologies: [Extract ACTUAL frontend frameworks mentioned + relevant ones like React, Angular, Vue, etc.]",
-    "Backend Technologies: [Extract ACTUAL backend technologies mentioned + relevant ones like Node.js, Express, Django, etc.]",
-    "Databases & Data Storage: [Extract ACTUAL database systems mentioned + relevant ones like PostgreSQL, MongoDB, MySQL, etc.]",
-    "Cloud Platforms & Services: [Extract ACTUAL cloud services mentioned + relevant ones like AWS, Azure, GCP, etc.]",
-    "DevOps & Infrastructure: [Extract ACTUAL DevOps tools mentioned + relevant ones like Docker, Kubernetes, Jenkins, etc.]",
-    "Development Tools & IDEs: [Extract ACTUAL development tools mentioned + relevant ones like Git, VS Code, IntelliJ, etc.]",
-    "Testing & Quality Assurance: [Extract ACTUAL testing frameworks mentioned + relevant ones like Jest, Cypress, Selenium, etc.]",
-    "APIs & Integration: [Extract ACTUAL API technologies mentioned + relevant ones like REST, GraphQL, WebSocket, etc.]",
-    "Monitoring & Analytics: [Extract ACTUAL monitoring tools mentioned + relevant ones like New Relic, DataDog, Google Analytics, etc.]",
-    "Security & Compliance: [Extract ACTUAL security frameworks mentioned + relevant ones like OAuth, JWT, HTTPS, etc.]",
-    "Data Science & Analytics: [Extract ACTUAL data tools mentioned + relevant ones like Pandas, NumPy, Tableau, etc.]",
-    "Mobile & Cross-Platform: [Extract ACTUAL mobile technologies mentioned + relevant ones like React Native, Flutter, iOS, Android, etc.]",
-    "Emerging Technologies: [Extract ACTUAL emerging tech mentioned + relevant ones like AI/ML, Blockchain, IoT, etc.]",
-    "Methodologies & Practices: [Extract ACTUAL methodologies mentioned + relevant ones like Agile, Scrum, TDD, CI/CD, etc.]"
+    "Programming Languages: [List ACTUAL languages from job description like JavaScript, Python, Java, etc.]",
+    "Frontend Technologies: [List ACTUAL frontend tools from job description like React, Angular, Vue, etc.]",
+    "Backend Technologies: [List ACTUAL backend tools from job description like Node.js, Django, Spring, etc.]",
+    "Databases: [List ACTUAL database systems from job description like PostgreSQL, MongoDB, MySQL, etc.]",
+    "Cloud Platforms: [List ACTUAL cloud services from job description like AWS, Azure, GCP, etc.]",
+    "DevOps Tools: [List ACTUAL DevOps tools from job description like Docker, Kubernetes, Jenkins, etc.]",
+    "Development Tools: [List ACTUAL development tools from job description like Git, VS Code, IntelliJ, etc.]",
+    "Testing Frameworks: [List ACTUAL testing tools from job description like Jest, Cypress, Selenium, etc.]",
+    "APIs & Integration: [List ACTUAL API technologies from job description like REST, GraphQL, WebSocket, etc.]",
+    "Monitoring & Analytics: [List ACTUAL monitoring tools from job description like New Relic, DataDog, etc.]",
+    "Security Tools: [List ACTUAL security frameworks from job description like OAuth, JWT, HTTPS, etc.]",
+    "Data Technologies: [List ACTUAL data tools from job description like Pandas, NumPy, Tableau, etc.]",
+    "Mobile Technologies: [List ACTUAL mobile tools from job description like React Native, Flutter, etc.]",
+    "Emerging Technologies: [List ACTUAL emerging tech from job description like AI/ML, Blockchain, etc.]",
+    "Methodologies: [List ACTUAL methodologies from job description like Agile, Scrum, TDD, CI/CD, etc.]"
   ]
 }
 
-FOCUS: Perfect balance between 2 detailed project examples and 6 keyword-rich achievements that incorporate every soft skill and technical term from the job description for maximum ATS compatibility. NEVER use placeholder text in technical skills - always extract and list real technologies.
+CRITICAL: Extract REAL technology names from the job description. Never use placeholder text. Achieve 95%+ ATS score through strategic keyword placement and natural language integration.
 `
 }
 
 function extractJsonFromContent(content: string): string {
-  // First, try to find JSON within markdown code blocks
-  const codeBlockRegex = /```(?:json)?\s*(\{[\s\S]*?\})\s*```/i
-  const codeBlockMatch = content.match(codeBlockRegex)
+  // Remove any markdown code blocks
+  content = content.replace(/```(?:json)?\s*/g, '').replace(/```\s*/g, '')
   
-  if (codeBlockMatch) {
-    return codeBlockMatch[1].trim()
+  // Find the JSON object
+  const jsonStart = content.indexOf('{')
+  const jsonEnd = content.lastIndexOf('}')
+  
+  if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    return content.substring(jsonStart, jsonEnd + 1)
   }
   
-  // If no code blocks, try to find JSON object in the content
-  const jsonRegex = /\{[\s\S]*\}/
-  const jsonMatch = content.match(jsonRegex)
-  
-  if (jsonMatch) {
-    return jsonMatch[0].trim()
-  }
-  
-  // If no JSON found, return the original content
   return content.trim()
 }
 
@@ -453,14 +452,14 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS optimization specialist and resume writer. Create resumes with 99%+ ATS scores by perfectly balancing 2 realistic project examples with 6 keyword-rich achievements per work experience. Focus on incorporating ALL technical keywords AND soft skills from job descriptions while maintaining natural language flow. Generate detailed project examples (50-70 words) with authentic names, scope, and technical challenges, plus strategic keyword-optimized achievements (40-60 words) that cover leadership, collaboration, problem-solving, and other soft skills mentioned in the job description. CRITICAL: For technical skills, you MUST extract real technology names from the job description - NEVER use placeholder text like "[List from JD]" or "[ALL from job description]". Always provide specific, actual technology names and frameworks. Return ONLY valid JSON without any markdown formatting, code blocks, or additional text.'
+          content: 'You are an expert ATS optimization specialist with 99.2% success rate. Create resumes that achieve 95%+ ATS scores through strategic keyword integration, natural language flow, and proper technical skill extraction. CRITICAL: Always extract REAL technology names from job descriptions - never use placeholder text like "[Extract from JD]" or "[List from job description]". Focus on achieving optimal keyword density (2-4%) while maintaining readability. Return ONLY valid JSON without any markdown formatting.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.7,
+      temperature: 0.3, // Lower temperature for more consistent, focused output
       max_tokens: 4000
     })
   })
@@ -474,12 +473,10 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
   const content = data.choices[0].message.content
   
   try {
-    // Extract JSON from the content, handling markdown code blocks
     const jsonContent = extractJsonFromContent(content)
     return JSON.parse(jsonContent)
   } catch (error) {
     console.error('Failed to parse OpenAI response:', content)
-    console.error('Extraction attempt:', extractJsonFromContent(content))
     throw new Error('Invalid response from AI service - unable to parse JSON')
   }
 }
@@ -500,7 +497,13 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
           role: 'user',
           content: `${prompt}
 
-CRITICAL: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. The response must start with { and end with }. For technical skills, you MUST extract real technology names from the job description - NEVER use placeholder text like "[List from JD]" or "[ALL from job description]". Always provide specific, actual technology names and frameworks.`
+CRITICAL INSTRUCTIONS:
+- Return ONLY valid JSON without any markdown formatting, code blocks, or additional text
+- Extract REAL technology names from the job description - never use placeholder text
+- Achieve 95%+ ATS score through strategic keyword placement
+- Maintain 2-4% keyword density for optimal parsing
+- Use natural language integration to avoid keyword stuffing
+- The response must start with { and end with }`
         }
       ]
     })
@@ -515,12 +518,10 @@ CRITICAL: Return ONLY valid JSON without any markdown formatting, code blocks, o
   const content = data.content[0].text
   
   try {
-    // Extract JSON from the content, handling markdown code blocks
     const jsonContent = extractJsonFromContent(content)
     return JSON.parse(jsonContent)
   } catch (error) {
     console.error('Failed to parse Anthropic response:', content)
-    console.error('Extraction attempt:', extractJsonFromContent(content))
     throw new Error('Invalid response from AI service - unable to parse JSON')
   }
 }
