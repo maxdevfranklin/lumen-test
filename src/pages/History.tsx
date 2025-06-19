@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { Search, Download, Trash2, Calendar, Building, Briefcase, FileText, Filter, X, ChevronRight, ChevronDown, Eye } from 'lucide-react'
+import { Search, Download, Trash2, Calendar, Building, Briefcase, FileText, Filter, X, ChevronRight, ChevronDown, Eye, ChevronLeft } from 'lucide-react'
 import { downloadPDF, downloadDocx } from '../services/fileGenerator'
 
 interface JobHistoryItem {
@@ -20,6 +20,13 @@ interface JobHistoryItem {
   }[]
 }
 
+interface PaginationInfo {
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  itemsPerPage: number
+}
+
 export function History() {
   const { user } = useAuth()
   const [history, setHistory] = useState<JobHistoryItem[]>([])
@@ -33,19 +40,85 @@ export function History() {
   const [aiProviderFilter, setAiProviderFilter] = useState('')
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobHistoryItem | null>(null)
+  
+  // Pagination state
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  })
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
     if (user) {
-      loadHistory()
+      if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
+        // When searching/filtering, load all data and filter client-side
+        loadAllHistoryForSearch()
+      } else {
+        // When not searching, use pagination
+        loadPaginatedHistory(pagination.currentPage)
+      }
     }
-  }, [user])
+  }, [user, pagination.currentPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
 
-  useEffect(() => {
-    filterHistory()
-  }, [history, searchTerm, dateFilter, companyFilter, aiProviderFilter])
-
-  const loadHistory = async () => {
+  const loadPaginatedHistory = async (page: number) => {
     try {
+      setLoading(true)
+      setIsSearching(false)
+      
+      const itemsPerPage = pagination.itemsPerPage
+      const from = (page - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      // Get total count first
+      const { count } = await supabase
+        .from('job_history')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+
+      // Get paginated data
+      const { data, error } = await supabase
+        .from('job_history')
+        .select(`
+          *,
+          resume_history (
+            id,
+            resume_data,
+            generation_cost,
+            ai_provider,
+            created_at
+          )
+        `)
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (error) {
+        console.error('Error loading paginated history:', error)
+        return
+      }
+
+      setHistory(data || [])
+      setFilteredHistory(data || [])
+      setPagination(prev => ({
+        ...prev,
+        currentPage: page,
+        totalItems: count || 0,
+        totalPages: Math.ceil((count || 0) / itemsPerPage)
+      }))
+    } catch (error) {
+      console.error('Error loading paginated history:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadAllHistoryForSearch = async () => {
+    try {
+      setLoading(true)
+      setIsSearching(true)
+
       const { data, error } = await supabase
         .from('job_history')
         .select(`
@@ -62,20 +135,24 @@ export function History() {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error loading history:', error)
+        console.error('Error loading all history for search:', error)
         return
       }
 
-      setHistory(data || [])
+      const allHistory = data || []
+      setHistory(allHistory)
+      
+      // Apply filters
+      filterHistory(allHistory)
     } catch (error) {
-      console.error('Error loading history:', error)
+      console.error('Error loading all history for search:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filterHistory = () => {
-    let filtered = [...history]
+  const filterHistory = (historyData: JobHistoryItem[]) => {
+    let filtered = [...historyData]
 
     // Search filter
     if (searchTerm.trim()) {
@@ -112,6 +189,23 @@ export function History() {
     }
 
     setFilteredHistory(filtered)
+    
+    // Update pagination info for search results
+    if (isSearching) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: 1,
+        totalItems: filtered.length,
+        totalPages: Math.ceil(filtered.length / prev.itemsPerPage)
+      }))
+    }
+  }
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, currentPage: newPage }))
+      setSelectedItems(new Set()) // Clear selections when changing pages
+    }
   }
 
   const handleSelectItem = (itemId: string) => {
@@ -125,10 +219,11 @@ export function History() {
   }
 
   const handleSelectAll = () => {
-    if (selectedItems.size === filteredHistory.length) {
+    const currentPageItems = isSearching ? filteredHistory : filteredHistory
+    if (selectedItems.size === currentPageItems.length) {
       setSelectedItems(new Set())
     } else {
-      setSelectedItems(new Set(filteredHistory.map(item => item.id)))
+      setSelectedItems(new Set(currentPageItems.map(item => item.id)))
     }
   }
 
@@ -153,9 +248,13 @@ export function History() {
         return
       }
 
-      // Remove deleted items from state
-      setHistory(prev => prev.filter(item => !selectedItems.has(item.id)))
+      // Reload current view
       setSelectedItems(new Set())
+      if (isSearching) {
+        loadAllHistoryForSearch()
+      } else {
+        loadPaginatedHistory(pagination.currentPage)
+      }
     } catch (error) {
       console.error('Error deleting items:', error)
       alert('Error deleting items. Please try again.')
@@ -208,6 +307,80 @@ export function History() {
     setCompanyFilter('')
     setAiProviderFilter('')
     setShowFilters(false)
+    // This will trigger useEffect to reload paginated data
+  }
+
+  const renderPagination = () => {
+    if (pagination.totalPages <= 1) return null
+
+    const pages = []
+    const maxVisiblePages = 5
+    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1)
+
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    // Previous button
+    pages.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(pagination.currentPage - 1)}
+        disabled={pagination.currentPage === 1}
+        className="px-3 py-2 text-sm border border-gray-300 rounded-l-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+    )
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 text-sm border-t border-b border-r border-gray-300 ${
+            i === pagination.currentPage
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+
+    // Next button
+    pages.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(pagination.currentPage + 1)}
+        disabled={pagination.currentPage === pagination.totalPages}
+        className="px-3 py-2 text-sm border border-gray-300 rounded-r-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    )
+
+    return (
+      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center text-sm text-gray-700">
+          <span>
+            Showing {isSearching ? filteredHistory.length : Math.min((pagination.currentPage - 1) * pagination.itemsPerPage + 1, pagination.totalItems)} to{' '}
+            {isSearching ? filteredHistory.length : Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
+            {pagination.totalItems} results
+          </span>
+        </div>
+        
+        {!isSearching && (
+          <div className="flex items-center space-x-1">
+            {pages}
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (loading) {
@@ -230,7 +403,19 @@ export function History() {
                   <div>
                     <h1 className="text-xl font-bold text-gray-900">Resume History</h1>
                     <p className="text-sm text-gray-600">
-                      {filteredHistory.length} of {history.length} resumes
+                      {isSearching ? (
+                        <>
+                          {filteredHistory.length} search results
+                          {(searchTerm || dateFilter || companyFilter || aiProviderFilter) && (
+                            <span className="text-blue-600 ml-1">(filtered from all records)</span>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {filteredHistory.length} of {pagination.totalItems} resumes
+                          <span className="text-gray-500 ml-1">(page {pagination.currentPage} of {pagination.totalPages})</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   
@@ -265,8 +450,15 @@ export function History() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Search by company, role, job description, or notes..."
+                      placeholder="Search across all records (company, role, job description, notes)..."
                     />
+                    {isSearching && (searchTerm || dateFilter || companyFilter || aiProviderFilter) && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          Global Search
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Advanced Filters */}
@@ -329,17 +521,17 @@ export function History() {
               </div>
 
               {/* History List */}
-              <div className="divide-y divide-gray-200 max-h-[calc(100vh-300px)] overflow-y-auto">
+              <div className="divide-y divide-gray-200 max-h-[calc(100vh-400px)] overflow-y-auto">
                 {filteredHistory.length === 0 ? (
                   <div className="p-8 text-center">
                     <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {history.length === 0 ? 'No Resume History' : 'No Results Found'}
+                      {isSearching ? 'No Results Found' : 'No Resume History'}
                     </h3>
                     <p className="text-gray-500">
-                      {history.length === 0 
-                        ? 'Generate your first resume to see it here'
-                        : 'Try adjusting your search or filter criteria'
+                      {isSearching 
+                        ? 'Try adjusting your search or filter criteria'
+                        : 'Generate your first resume to see it here'
                       }
                     </p>
                   </div>
@@ -499,6 +691,9 @@ export function History() {
                   </>
                 )}
               </div>
+
+              {/* Pagination */}
+              {renderPagination()}
             </div>
           </div>
 
