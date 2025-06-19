@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Search, Download, Trash2, Calendar, Building, Briefcase, FileText, Filter, X, ChevronRight, ChevronDown, Eye, ChevronLeft } from 'lucide-react'
@@ -33,6 +33,7 @@ export function History() {
   const [filteredHistory, setFilteredHistory] = useState<JobHistoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('') // Separate input state
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [dateFilter, setDateFilter] = useState('')
@@ -41,12 +42,12 @@ export function History() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobHistoryItem | null>(null)
   
-  // Pagination state
+  // Pagination state - Default to 50 items per page
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
-    itemsPerPage: 10
+    itemsPerPage: 50
   })
   const [isSearching, setIsSearching] = useState(false)
   const [pageInput, setPageInput] = useState('')
@@ -202,6 +203,17 @@ export function History() {
     }
   }
 
+  // Handle search input with Enter key
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSearchTerm(searchInput.trim())
+  }
+
+  // Handle search input change (no immediate search)
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value)
+  }
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPagination(prev => ({ ...prev, currentPage: newPage }))
@@ -325,6 +337,7 @@ export function History() {
 
   const clearFilters = () => {
     setSearchTerm('')
+    setSearchInput('')
     setDateFilter('')
     setCompanyFilter('')
     setAiProviderFilter('')
@@ -505,14 +518,14 @@ export function History() {
                 {/* Search and Filters */}
                 <div className="mt-3 space-y-3">
                   {/* Search Bar */}
-                  <div className="relative">
+                  <form onSubmit={handleSearchSubmit} className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                       type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      value={searchInput}
+                      onChange={handleSearchInputChange}
                       className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Search across all records (company, role, job description, notes)..."
+                      placeholder="Type to search, then press Enter to search across all records..."
                     />
                     {isSearching && (searchTerm || dateFilter || companyFilter || aiProviderFilter) && (
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -521,7 +534,7 @@ export function History() {
                         </span>
                       </div>
                     )}
-                  </div>
+                  </form>
 
                   {/* Advanced Filters */}
                   {showFilters && (
