@@ -49,6 +49,7 @@ export function History() {
     itemsPerPage: 10
   })
   const [isSearching, setIsSearching] = useState(false)
+  const [pageInput, setPageInput] = useState('')
 
   useEffect(() => {
     if (user) {
@@ -60,7 +61,7 @@ export function History() {
         loadPaginatedHistory(pagination.currentPage)
       }
     }
-  }, [user, pagination.currentPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
+  }, [user, pagination.currentPage, pagination.itemsPerPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
 
   const loadPaginatedHistory = async (page: number) => {
     try {
@@ -205,6 +206,27 @@ export function History() {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPagination(prev => ({ ...prev, currentPage: newPage }))
       setSelectedItems(new Set()) // Clear selections when changing pages
+      setPageInput('') // Clear page input
+    }
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setPagination(prev => ({
+      ...prev,
+      itemsPerPage: newItemsPerPage,
+      currentPage: 1, // Reset to first page
+      totalPages: Math.ceil(prev.totalItems / newItemsPerPage)
+    }))
+    setSelectedItems(new Set()) // Clear selections
+  }
+
+  const handlePageInputSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const pageNumber = parseInt(pageInput)
+    if (pageNumber && pageNumber >= 1 && pageNumber <= pagination.totalPages) {
+      handlePageChange(pageNumber)
+    } else {
+      setPageInput('') // Clear invalid input
     }
   }
 
@@ -365,18 +387,58 @@ export function History() {
     )
 
     return (
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center text-sm text-gray-700">
-          <span>
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 space-y-3 sm:space-y-0">
+        {/* Left side - Results info and items per page */}
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <div className="text-sm text-gray-700">
             Showing {isSearching ? filteredHistory.length : Math.min((pagination.currentPage - 1) * pagination.itemsPerPage + 1, pagination.totalItems)} to{' '}
             {isSearching ? filteredHistory.length : Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
             {pagination.totalItems} results
-          </span>
+          </div>
+          
+          {!isSearching && (
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-gray-600">Items per page:</label>
+              <select
+                value={pagination.itemsPerPage}
+                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          )}
         </div>
         
+        {/* Right side - Page navigation */}
         {!isSearching && (
-          <div className="flex items-center space-x-1">
-            {pages}
+          <div className="flex items-center space-x-4">
+            {/* Go to page input */}
+            <form onSubmit={handlePageInputSubmit} className="flex items-center space-x-2">
+              <label className="text-sm text-gray-600">Go to page:</label>
+              <input
+                type="number"
+                min="1"
+                max={pagination.totalPages}
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                className="w-16 text-sm border border-gray-300 rounded px-2 py-1 text-center focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder={pagination.currentPage.toString()}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Go
+              </button>
+            </form>
+            
+            {/* Page navigation buttons */}
+            <div className="flex items-center space-x-1">
+              {pages}
+            </div>
           </div>
         )}
       </div>
@@ -521,7 +583,7 @@ export function History() {
               </div>
 
               {/* History List */}
-              <div className="divide-y divide-gray-200 max-h-[calc(100vh-400px)] overflow-y-auto">
+              <div className="divide-y divide-gray-200" style={{ height: 'calc(100vh - 500px)', minHeight: '600px', overflowY: 'auto' }}>
                 {filteredHistory.length === 0 ? (
                   <div className="p-8 text-center">
                     <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
