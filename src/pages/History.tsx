@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Search, Download, Trash2, Calendar, Building, Briefcase, FileText, Filter, X, ChevronRight, ChevronDown, Eye, ChevronLeft } from 'lucide-react'
@@ -53,30 +53,18 @@ export function History() {
   const [isSearching, setIsSearching] = useState(false)
   const [pageInput, setPageInput] = useState('')
 
-  // Wait for auth to complete before loading data
-  useEffect(() => {
-    if (authLoading) return // Don't load anything while auth is loading
-    
-    if (!user) {
-      setLoading(false)
-      setError('User not authenticated')
-      return
-    }
+  // Use refs to track if data has been loaded to prevent unnecessary reloads
+  const hasLoadedRef = useRef(false)
+  const lastLoadParamsRef = useRef<string>('')
 
-    // Reset error state when user is available
-    setError(null)
-    
-    if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
-      // When searching/filtering, load all data and filter client-side
-      loadAllHistoryForSearch()
-    } else {
-      // When not searching, use pagination
-      loadPaginatedHistory(pagination.currentPage)
-    }
-  }, [user, authLoading, pagination.currentPage, pagination.itemsPerPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
-
-  const loadPaginatedHistory = async (page: number) => {
+  // Memoized load functions to prevent unnecessary re-renders
+  const loadPaginatedHistory = useCallback(async (page: number) => {
     if (!user) return
+    
+    const loadParams = `paginated-${page}-${pagination.itemsPerPage}`
+    if (hasLoadedRef.current && lastLoadParamsRef.current === loadParams) {
+      return // Don't reload if we already have this data
+    }
     
     try {
       setLoading(true)
@@ -130,16 +118,24 @@ export function History() {
         totalItems: count || 0,
         totalPages: Math.ceil((count || 0) / itemsPerPage)
       }))
+      
+      hasLoadedRef.current = true
+      lastLoadParamsRef.current = loadParams
     } catch (error) {
       console.error('Error loading paginated history:', error)
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, pagination.itemsPerPage])
 
-  const loadAllHistoryForSearch = async () => {
+  const loadAllHistoryForSearch = useCallback(async () => {
     if (!user) return
+    
+    const searchParams = `search-${searchTerm}-${dateFilter}-${companyFilter}-${aiProviderFilter}`
+    if (hasLoadedRef.current && lastLoadParamsRef.current === searchParams) {
+      return // Don't reload if we already have this search data
+    }
     
     try {
       setLoading(true)
@@ -172,15 +168,52 @@ export function History() {
       
       // Apply filters
       filterHistory(allHistory)
+      
+      hasLoadedRef.current = true
+      lastLoadParamsRef.current = searchParams
     } catch (error) {
       console.error('Error loading all history for search:', error)
       setError('An unexpected error occurred during search')
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, searchTerm, dateFilter, companyFilter, aiProviderFilter])
 
-  const filterHistory = (historyData: JobHistoryItem[]) => {
+  // Only load data when necessary - prevent reloads on tab switches
+  useEffect(() => {
+    if (authLoading) return // Don't load anything while auth is loading
+    
+    if (!user) {
+      setLoading(false)
+      setError('User not authenticated')
+      hasLoadedRef.current = false
+      lastLoadParamsRef.current = ''
+      return
+    }
+
+    // Reset error state when user is available
+    setError(null)
+    
+    // Only load if we haven't loaded this specific data before
+    if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
+      // When searching/filtering, load all data and filter client-side
+      loadAllHistoryForSearch()
+    } else {
+      // When not searching, use pagination
+      loadPaginatedHistory(pagination.currentPage)
+    }
+  }, [user, authLoading, loadPaginatedHistory, loadAllHistoryForSearch])
+
+  // Separate effect for pagination changes (only when not searching)
+  useEffect(() => {
+    if (!user || authLoading || isSearching) return
+    
+    // Reset the loaded flag when pagination changes to force reload
+    hasLoadedRef.current = false
+    loadPaginatedHistory(pagination.currentPage)
+  }, [pagination.currentPage, pagination.itemsPerPage])
+
+  const filterHistory = useCallback((historyData: JobHistoryItem[]) => {
     let filtered = [...historyData]
 
     // Search filter
@@ -228,11 +261,12 @@ export function History() {
         totalPages: Math.ceil(filtered.length / prev.itemsPerPage)
       }))
     }
-  }
+  }, [searchTerm, dateFilter, companyFilter, aiProviderFilter, isSearching])
 
   // Handle search input with Enter key
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    hasLoadedRef.current = false // Force reload for new search
     setSearchTerm(searchInput.trim())
   }
 
@@ -250,6 +284,7 @@ export function History() {
   }
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    hasLoadedRef.current = false // Force reload for new page size
     setPagination(prev => ({
       ...prev,
       itemsPerPage: newItemsPerPage,
@@ -309,7 +344,8 @@ export function History() {
         return
       }
 
-      // Reload current view
+      // Force reload after deletion
+      hasLoadedRef.current = false
       setSelectedItems(new Set())
       if (isSearching) {
         loadAllHistoryForSearch()
@@ -363,6 +399,7 @@ export function History() {
   }
 
   const clearFilters = () => {
+    hasLoadedRef.current = false // Force reload when clearing filters
     setSearchTerm('')
     setSearchInput('')
     setDateFilter('')
@@ -523,6 +560,7 @@ export function History() {
           <button
             onClick={() => {
               setError(null)
+              hasLoadedRef.current = false // Force reload
               if (isSearching) {
                 loadAllHistoryForSearch()
               } else {
