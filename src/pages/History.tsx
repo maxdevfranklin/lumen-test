@@ -28,10 +28,11 @@ interface PaginationInfo {
 }
 
 export function History() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [history, setHistory] = useState<JobHistoryItem[]>([])
   const [filteredHistory, setFilteredHistory] = useState<JobHistoryItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchInput, setSearchInput] = useState('') // Separate input state
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
@@ -52,21 +53,34 @@ export function History() {
   const [isSearching, setIsSearching] = useState(false)
   const [pageInput, setPageInput] = useState('')
 
+  // Wait for auth to complete before loading data
   useEffect(() => {
-    if (user) {
-      if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
-        // When searching/filtering, load all data and filter client-side
-        loadAllHistoryForSearch()
-      } else {
-        // When not searching, use pagination
-        loadPaginatedHistory(pagination.currentPage)
-      }
+    if (authLoading) return // Don't load anything while auth is loading
+    
+    if (!user) {
+      setLoading(false)
+      setError('User not authenticated')
+      return
     }
-  }, [user, pagination.currentPage, pagination.itemsPerPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
+
+    // Reset error state when user is available
+    setError(null)
+    
+    if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
+      // When searching/filtering, load all data and filter client-side
+      loadAllHistoryForSearch()
+    } else {
+      // When not searching, use pagination
+      loadPaginatedHistory(pagination.currentPage)
+    }
+  }, [user, authLoading, pagination.currentPage, pagination.itemsPerPage, searchTerm, dateFilter, companyFilter, aiProviderFilter])
 
   const loadPaginatedHistory = async (page: number) => {
+    if (!user) return
+    
     try {
       setLoading(true)
+      setError(null)
       setIsSearching(false)
       
       const itemsPerPage = pagination.itemsPerPage
@@ -74,10 +88,16 @@ export function History() {
       const to = from + itemsPerPage - 1
 
       // Get total count first
-      const { count } = await supabase
+      const { count, error: countError } = await supabase
         .from('job_history')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
+
+      if (countError) {
+        console.error('Error getting count:', countError)
+        setError('Failed to load history count')
+        return
+      }
 
       // Get paginated data
       const { data, error } = await supabase
@@ -92,12 +112,13 @@ export function History() {
             created_at
           )
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .range(from, to)
 
       if (error) {
         console.error('Error loading paginated history:', error)
+        setError('Failed to load history data')
         return
       }
 
@@ -111,14 +132,18 @@ export function History() {
       }))
     } catch (error) {
       console.error('Error loading paginated history:', error)
+      setError('An unexpected error occurred')
     } finally {
       setLoading(false)
     }
   }
 
   const loadAllHistoryForSearch = async () => {
+    if (!user) return
+    
     try {
       setLoading(true)
+      setError(null)
       setIsSearching(true)
 
       const { data, error } = await supabase
@@ -133,11 +158,12 @@ export function History() {
             created_at
           )
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Error loading all history for search:', error)
+        setError('Failed to load search data')
         return
       }
 
@@ -148,6 +174,7 @@ export function History() {
       filterHistory(allHistory)
     } catch (error) {
       console.error('Error loading all history for search:', error)
+      setError('An unexpected error occurred during search')
     } finally {
       setLoading(false)
     }
@@ -458,10 +485,66 @@ export function History() {
     )
   }
 
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error if user is not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center">
+          <FileText className="h-12 w-12 text-red-600 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">
+            Please sign in to view your resume history.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error if there's a data loading error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center">
+          <FileText className="h-12 w-12 text-red-600 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading History</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => {
+              setError(null)
+              if (isSearching) {
+                loadAllHistoryForSearch()
+              } else {
+                loadPaginatedHistory(pagination.currentPage)
+              }
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading history...</p>
+        </div>
       </div>
     )
   }
