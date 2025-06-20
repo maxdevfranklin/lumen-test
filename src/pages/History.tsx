@@ -20,6 +20,23 @@ interface JobHistoryItem {
   }[]
 }
 
+interface JobHistoryPreview {
+  id: string
+  company_name: string
+  role: string
+  job_description_preview: string
+  note: string | null
+  created_at: string
+  resume_count: number
+  latest_resume?: {
+    id: string
+    resume_data: any
+    generation_cost: number | null
+    ai_provider: string
+    created_at: string
+  }
+}
+
 interface PaginationInfo {
   currentPage: number
   totalPages: number
@@ -29,12 +46,12 @@ interface PaginationInfo {
 
 export function History() {
   const { user, loading: authLoading } = useAuth()
-  const [history, setHistory] = useState<JobHistoryItem[]>([])
-  const [filteredHistory, setFilteredHistory] = useState<JobHistoryItem[]>([])
+  const [historyPreviews, setHistoryPreviews] = useState<JobHistoryPreview[]>([])
+  const [filteredHistory, setFilteredHistory] = useState<JobHistoryPreview[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchInput, setSearchInput] = useState('') // Separate input state
+  const [searchInput, setSearchInput] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [dateFilter, setDateFilter] = useState('')
@@ -42,8 +59,9 @@ export function History() {
   const [aiProviderFilter, setAiProviderFilter] = useState('')
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobHistoryItem | null>(null)
+  const [loadingJobDetail, setLoadingJobDetail] = useState(false)
   
-  // Pagination state - Default to 50 items per page
+  // Pagination state
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -57,23 +75,49 @@ export function History() {
   const hasLoadedRef = useRef(false)
   const lastLoadParamsRef = useRef<string>('')
 
-  // Memoized load functions to prevent unnecessary re-renders
-  const loadPaginatedHistory = useCallback(async (page: number) => {
+  // Load job history previews (fast loading with minimal data)
+  const loadHistoryPreviews = useCallback(async (page: number) => {
     if (!user) return
     
-    const loadParams = `paginated-${page}-${pagination.itemsPerPage}`
+    const loadParams = `previews-${page}-${pagination.itemsPerPage}-${searchTerm}-${dateFilter}-${companyFilter}-${aiProviderFilter}`
     if (hasLoadedRef.current && lastLoadParamsRef.current === loadParams) {
-      return // Don't reload if we already have this data
+      return
     }
     
     try {
       setLoading(true)
       setError(null)
-      setIsSearching(false)
       
-      const itemsPerPage = pagination.itemsPerPage
-      const from = (page - 1) * itemsPerPage
-      const to = from + itemsPerPage - 1
+      let query = supabase
+        .from('job_history')
+        .select(`
+          id,
+          company_name,
+          role,
+          job_description,
+          note,
+          created_at
+        `)
+        .eq('user_id', user.id)
+
+      // Apply filters
+      if (searchTerm.trim()) {
+        setIsSearching(true)
+        query = query.or(`company_name.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%,job_description.ilike.%${searchTerm}%`)
+      } else {
+        setIsSearching(false)
+      }
+
+      if (dateFilter) {
+        const filterDate = new Date(dateFilter)
+        const nextDay = new Date(filterDate)
+        nextDay.setDate(nextDay.getDate() + 1)
+        query = query.gte('created_at', filterDate.toISOString()).lt('created_at', nextDay.toISOString())
+      }
+
+      if (companyFilter.trim()) {
+        query = query.ilike('company_name', `%${companyFilter}%`)
+      }
 
       // Get total count first
       const { count, error: countError } = await supabase
@@ -87,101 +131,130 @@ export function History() {
         return
       }
 
-      // Get paginated data
-      const { data, error } = await supabase
-        .from('job_history')
-        .select(`
-          *,
-          resume_history (
-            id,
-            resume_data,
-            generation_cost,
-            ai_provider,
-            created_at
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .range(from, to)
+      // Apply pagination only if not searching
+      if (!isSearching && !dateFilter && !companyFilter && !aiProviderFilter) {
+        const itemsPerPage = pagination.itemsPerPage
+        const from = (page - 1) * itemsPerPage
+        const to = from + itemsPerPage - 1
+        query = query.range(from, to)
+      }
+
+      query = query.order('created_at', { ascending: false })
+
+      const { data: jobData, error } = await query
 
       if (error) {
-        console.error('Error loading paginated history:', error)
+        console.error('Error loading history previews:', error)
         setError('Failed to load history data')
         return
       }
 
-      setHistory(data || [])
-      setFilteredHistory(data || [])
+      // Get resume counts for each job
+      const jobIds = jobData?.map(job => job.id) || []
+      const { data: resumeCounts } = await supabase
+        .from('resume_history')
+        .select('job_history_id, id, generation_cost, ai_provider, created_at, resume_data')
+        .in('job_history_id', jobIds)
+        .order('created_at', { ascending: false })
+
+      // Process data into previews
+      const previews: JobHistoryPreview[] = (jobData || []).map(job => {
+        const jobResumes = resumeCounts?.filter(r => r.job_history_id === job.id) || []
+        const latestResume = jobResumes[0]
+        
+        return {
+          id: job.id,
+          company_name: job.company_name,
+          role: job.role,
+          job_description_preview: job.job_description.substring(0, 120) + '...',
+          note: job.note,
+          created_at: job.created_at,
+          resume_count: jobResumes.length,
+          latest_resume: latestResume ? {
+            id: latestResume.id,
+            resume_data: latestResume.resume_data,
+            generation_cost: latestResume.generation_cost,
+            ai_provider: latestResume.ai_provider,
+            created_at: latestResume.created_at
+          } : undefined
+        }
+      })
+
+      // Apply AI provider filter if needed
+      let filteredPreviews = previews
+      if (aiProviderFilter) {
+        filteredPreviews = previews.filter(preview => 
+          preview.latest_resume?.ai_provider === aiProviderFilter
+        )
+      }
+
+      setHistoryPreviews(previews)
+      setFilteredHistory(filteredPreviews)
+      
+      // Update pagination
+      const totalItems = isSearching || dateFilter || companyFilter || aiProviderFilter ? filteredPreviews.length : (count || 0)
       setPagination(prev => ({
         ...prev,
         currentPage: page,
-        totalItems: count || 0,
-        totalPages: Math.ceil((count || 0) / itemsPerPage)
+        totalItems,
+        totalPages: Math.ceil(totalItems / prev.itemsPerPage)
       }))
       
       hasLoadedRef.current = true
       lastLoadParamsRef.current = loadParams
     } catch (error) {
-      console.error('Error loading paginated history:', error)
+      console.error('Error loading history previews:', error)
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
     }
-  }, [user, pagination.itemsPerPage])
+  }, [user, pagination.itemsPerPage, searchTerm, dateFilter, companyFilter, aiProviderFilter, isSearching])
 
-  const loadAllHistoryForSearch = useCallback(async () => {
+  // Load full job details when clicked
+  const loadJobDetail = useCallback(async (jobId: string) => {
     if (!user) return
     
-    const searchParams = `search-${searchTerm}-${dateFilter}-${companyFilter}-${aiProviderFilter}`
-    if (hasLoadedRef.current && lastLoadParamsRef.current === searchParams) {
-      return // Don't reload if we already have this search data
-    }
-    
+    setLoadingJobDetail(true)
     try {
-      setLoading(true)
-      setError(null)
-      setIsSearching(true)
-
-      const { data, error } = await supabase
+      const { data: jobData, error: jobError } = await supabase
         .from('job_history')
-        .select(`
-          *,
-          resume_history (
-            id,
-            resume_data,
-            generation_cost,
-            ai_provider,
-            created_at
-          )
-        `)
+        .select('*')
+        .eq('id', jobId)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .single()
 
-      if (error) {
-        console.error('Error loading all history for search:', error)
-        setError('Failed to load search data')
+      if (jobError) {
+        console.error('Error loading job detail:', jobError)
         return
       }
 
-      const allHistory = data || []
-      setHistory(allHistory)
-      
-      // Apply filters
-      filterHistory(allHistory)
-      
-      hasLoadedRef.current = true
-      lastLoadParamsRef.current = searchParams
-    } catch (error) {
-      console.error('Error loading all history for search:', error)
-      setError('An unexpected error occurred during search')
-    } finally {
-      setLoading(false)
-    }
-  }, [user, searchTerm, dateFilter, companyFilter, aiProviderFilter])
+      const { data: resumeData, error: resumeError } = await supabase
+        .from('resume_history')
+        .select('*')
+        .eq('job_history_id', jobId)
+        .order('created_at', { ascending: false })
 
-  // Only load data when necessary - prevent reloads on tab switches
+      if (resumeError) {
+        console.error('Error loading resume history:', resumeError)
+        return
+      }
+
+      const fullJobDetail: JobHistoryItem = {
+        ...jobData,
+        resume_history: resumeData || []
+      }
+
+      setSelectedJobDetail(fullJobDetail)
+    } catch (error) {
+      console.error('Error loading job detail:', error)
+    } finally {
+      setLoadingJobDetail(false)
+    }
+  }, [user])
+
+  // Load data when component mounts or dependencies change
   useEffect(() => {
-    if (authLoading) return // Don't load anything while auth is loading
+    if (authLoading) return
     
     if (!user) {
       setLoading(false)
@@ -191,107 +264,63 @@ export function History() {
       return
     }
 
-    // Reset error state when user is available
     setError(null)
-    
-    // Only load if we haven't loaded this specific data before
-    if (searchTerm.trim() || dateFilter || companyFilter || aiProviderFilter) {
-      // When searching/filtering, load all data and filter client-side
-      loadAllHistoryForSearch()
-    } else {
-      // When not searching, use pagination
-      loadPaginatedHistory(pagination.currentPage)
-    }
-  }, [user, authLoading, loadPaginatedHistory, loadAllHistoryForSearch])
+    hasLoadedRef.current = false // Force reload when filters change
+    loadHistoryPreviews(pagination.currentPage)
+  }, [user, authLoading, loadHistoryPreviews, pagination.currentPage])
 
-  // Separate effect for pagination changes (only when not searching)
-  useEffect(() => {
-    if (!user || authLoading || isSearching) return
-    
-    // Reset the loaded flag when pagination changes to force reload
-    hasLoadedRef.current = false
-    loadPaginatedHistory(pagination.currentPage)
-  }, [pagination.currentPage, pagination.itemsPerPage])
-
-  const filterHistory = useCallback((historyData: JobHistoryItem[]) => {
-    let filtered = [...historyData]
-
-    // Search filter
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase()
-      filtered = filtered.filter(item =>
-        item.company_name.toLowerCase().includes(searchLower) ||
-        item.role.toLowerCase().includes(searchLower) ||
-        item.job_description.toLowerCase().includes(searchLower) ||
-        (item.note && item.note.toLowerCase().includes(searchLower))
-      )
-    }
-
-    // Date filter
-    if (dateFilter) {
-      const filterDate = new Date(dateFilter)
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.created_at)
-        return itemDate.toDateString() === filterDate.toDateString()
-      })
-    }
-
-    // Company filter
-    if (companyFilter) {
-      filtered = filtered.filter(item =>
-        item.company_name.toLowerCase().includes(companyFilter.toLowerCase())
-      )
-    }
-
-    // AI Provider filter
-    if (aiProviderFilter) {
-      filtered = filtered.filter(item =>
-        item.resume_history.some(resume => resume.ai_provider === aiProviderFilter)
-      )
-    }
-
-    setFilteredHistory(filtered)
-    
-    // Update pagination info for search results
-    if (isSearching) {
-      setPagination(prev => ({
-        ...prev,
-        currentPage: 1,
-        totalItems: filtered.length,
-        totalPages: Math.ceil(filtered.length / prev.itemsPerPage)
-      }))
-    }
-  }, [searchTerm, dateFilter, companyFilter, aiProviderFilter, isSearching])
-
-  // Handle search input with Enter key
+  // Handle search with Enter key
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    hasLoadedRef.current = false // Force reload for new search
+    hasLoadedRef.current = false
     setSearchTerm(searchInput.trim())
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
   }
 
-  // Handle search input change (no immediate search)
+  // Handle company filter with Enter key
+  const handleCompanyFilterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    hasLoadedRef.current = false
+    loadHistoryPreviews(1)
+  }
+
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value)
+  }
+
+  const handleCompanyFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompanyFilter(e.target.value)
+  }
+
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    hasLoadedRef.current = false
+    setDateFilter(e.target.value)
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
+  }
+
+  const handleAiProviderFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    hasLoadedRef.current = false
+    setAiProviderFilter(e.target.value)
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
   }
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPagination(prev => ({ ...prev, currentPage: newPage }))
-      setSelectedItems(new Set()) // Clear selections when changing pages
-      setPageInput('') // Clear page input
+      setSelectedItems(new Set())
+      setPageInput('')
     }
   }
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
-    hasLoadedRef.current = false // Force reload for new page size
+    hasLoadedRef.current = false
     setPagination(prev => ({
       ...prev,
       itemsPerPage: newItemsPerPage,
-      currentPage: 1, // Reset to first page
+      currentPage: 1,
       totalPages: Math.ceil(prev.totalItems / newItemsPerPage)
     }))
-    setSelectedItems(new Set()) // Clear selections
+    setSelectedItems(new Set())
   }
 
   const handlePageInputSubmit = (e: React.FormEvent) => {
@@ -300,7 +329,7 @@ export function History() {
     if (pageNumber && pageNumber >= 1 && pageNumber <= pagination.totalPages) {
       handlePageChange(pageNumber)
     } else {
-      setPageInput('') // Clear invalid input
+      setPageInput('')
     }
   }
 
@@ -315,11 +344,10 @@ export function History() {
   }
 
   const handleSelectAll = () => {
-    const currentPageItems = isSearching ? filteredHistory : filteredHistory
-    if (selectedItems.size === currentPageItems.length) {
+    if (selectedItems.size === filteredHistory.length && filteredHistory.length > 0) {
       setSelectedItems(new Set())
     } else {
-      setSelectedItems(new Set(currentPageItems.map(item => item.id)))
+      setSelectedItems(new Set(filteredHistory.map(item => item.id)))
     }
   }
 
@@ -344,14 +372,9 @@ export function History() {
         return
       }
 
-      // Force reload after deletion
       hasLoadedRef.current = false
       setSelectedItems(new Set())
-      if (isSearching) {
-        loadAllHistoryForSearch()
-      } else {
-        loadPaginatedHistory(pagination.currentPage)
-      }
+      loadHistoryPreviews(pagination.currentPage)
     } catch (error) {
       console.error('Error deleting items:', error)
       alert('Error deleting items. Please try again.')
@@ -399,14 +422,14 @@ export function History() {
   }
 
   const clearFilters = () => {
-    hasLoadedRef.current = false // Force reload when clearing filters
+    hasLoadedRef.current = false
     setSearchTerm('')
     setSearchInput('')
     setDateFilter('')
     setCompanyFilter('')
     setAiProviderFilter('')
     setShowFilters(false)
-    // This will trigger useEffect to reload paginated data
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
   }
 
   const renderPagination = () => {
@@ -417,12 +440,10 @@ export function History() {
     let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2))
     let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1)
 
-    // Adjust start page if we're near the end
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1)
     }
 
-    // Previous button
     pages.push(
       <button
         key="prev"
@@ -434,7 +455,6 @@ export function History() {
       </button>
     )
 
-    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -451,7 +471,6 @@ export function History() {
       )
     }
 
-    // Next button
     pages.push(
       <button
         key="next"
@@ -465,11 +484,10 @@ export function History() {
 
     return (
       <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 space-y-3 sm:space-y-0">
-        {/* Left side - Results info and items per page */}
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="text-sm text-gray-700">
-            Showing {isSearching ? filteredHistory.length : Math.min((pagination.currentPage - 1) * pagination.itemsPerPage + 1, pagination.totalItems)} to{' '}
-            {isSearching ? filteredHistory.length : Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
+            Showing {Math.min((pagination.currentPage - 1) * pagination.itemsPerPage + 1, pagination.totalItems)} to{' '}
+            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
             {pagination.totalItems} results
           </div>
           
@@ -489,10 +507,8 @@ export function History() {
           )}
         </div>
         
-        {/* Right side - Page navigation */}
         {!isSearching && (
           <div className="flex items-center space-x-4">
-            {/* Go to page input */}
             <form onSubmit={handlePageInputSubmit} className="flex items-center space-x-2">
               <label className="text-sm text-gray-600">Go to page:</label>
               <input
@@ -512,7 +528,6 @@ export function History() {
               </button>
             </form>
             
-            {/* Page navigation buttons */}
             <div className="flex items-center space-x-1">
               {pages}
             </div>
@@ -522,7 +537,6 @@ export function History() {
     )
   }
 
-  // Show loading while auth is loading
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -534,7 +548,6 @@ export function History() {
     )
   }
 
-  // Show error if user is not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -549,7 +562,6 @@ export function History() {
     )
   }
 
-  // Show error if there's a data loading error
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -560,12 +572,8 @@ export function History() {
           <button
             onClick={() => {
               setError(null)
-              hasLoadedRef.current = false // Force reload
-              if (isSearching) {
-                loadAllHistoryForSearch()
-              } else {
-                loadPaginatedHistory(pagination.currentPage)
-              }
+              hasLoadedRef.current = false
+              loadHistoryPreviews(pagination.currentPage)
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
@@ -599,18 +607,9 @@ export function History() {
                   <div>
                     <h1 className="text-xl font-bold text-gray-900">Resume History</h1>
                     <p className="text-sm text-gray-600">
-                      {isSearching ? (
-                        <>
-                          {filteredHistory.length} search results
-                          {(searchTerm || dateFilter || companyFilter || aiProviderFilter) && (
-                            <span className="text-blue-600 ml-1">(filtered from all records)</span>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          {filteredHistory.length} of {pagination.totalItems} resumes
-                          <span className="text-gray-500 ml-1">(page {pagination.currentPage} of {pagination.totalPages})</span>
-                        </>
+                      {filteredHistory.length} of {pagination.totalItems} resumes
+                      {pagination.totalPages > 1 && (
+                        <span className="text-gray-500 ml-1">(page {pagination.currentPage} of {pagination.totalPages})</span>
                       )}
                     </p>
                   </div>
@@ -646,15 +645,8 @@ export function History() {
                       value={searchInput}
                       onChange={handleSearchInputChange}
                       className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Type to search, then press Enter to search across all records..."
+                      placeholder="Search company, role, or job description... (Press Enter to search)"
                     />
-                    {isSearching && (searchTerm || dateFilter || companyFilter || aiProviderFilter) && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          Global Search
-                        </span>
-                      </div>
-                    )}
                   </form>
 
                   {/* Advanced Filters */}
@@ -678,22 +670,24 @@ export function History() {
                           <input
                             type="date"
                             value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
+                            onChange={handleDateFilterChange}
                             className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                         
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Company
+                            Company (Press Enter to search)
                           </label>
-                          <input
-                            type="text"
-                            value={companyFilter}
-                            onChange={(e) => setCompanyFilter(e.target.value)}
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Filter by company..."
-                          />
+                          <form onSubmit={handleCompanyFilterSubmit}>
+                            <input
+                              type="text"
+                              value={companyFilter}
+                              onChange={handleCompanyFilterChange}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Filter by company..."
+                            />
+                          </form>
                         </div>
                         
                         <div>
@@ -702,7 +696,7 @@ export function History() {
                           </label>
                           <select
                             value={aiProviderFilter}
-                            onChange={(e) => setAiProviderFilter(e.target.value)}
+                            onChange={handleAiProviderFilterChange}
                             className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="">All Providers</option>
@@ -722,10 +716,10 @@ export function History() {
                   <div className="p-8 text-center">
                     <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {isSearching ? 'No Results Found' : 'No Resume History'}
+                      {isSearching || dateFilter || companyFilter || aiProviderFilter ? 'No Results Found' : 'No Resume History'}
                     </h3>
                     <p className="text-gray-500">
-                      {isSearching 
+                      {isSearching || dateFilter || companyFilter || aiProviderFilter
                         ? 'Try adjusting your search or filter criteria'
                         : 'Generate your first resume to see it here'
                       }
@@ -763,7 +757,7 @@ export function History() {
                             <div className="flex items-center justify-between mb-2">
                               <div 
                                 className="flex items-center space-x-3 cursor-pointer flex-1"
-                                onClick={() => setSelectedJobDetail(item)}
+                                onClick={() => loadJobDetail(item.id)}
                               >
                                 <div className="flex items-center space-x-2">
                                   <Building className="h-4 w-4 text-gray-400" />
@@ -805,72 +799,27 @@ export function History() {
                             {/* Job Description Preview */}
                             <div className="mb-2">
                               <p className="text-xs text-gray-600 line-clamp-1">
-                                {item.job_description.substring(0, 120)}...
+                                {item.job_description_preview}
                               </p>
                             </div>
 
-                            {/* Resume History - Expanded */}
-                            {expandedItems.has(item.id) && (
-                              <div className="space-y-2">
-                                {item.resume_history.map((resume) => (
-                                  <div key={resume.id} className="bg-blue-50 border border-blue-200 rounded p-2">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center space-x-2">
-                                        <span className="text-xs font-medium text-blue-900">
-                                          Resume Generated
-                                        </span>
-                                        <span className="text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded">
-                                          {resume.ai_provider === 'openai' ? 'OpenAI' : 'Anthropic'}
-                                        </span>
-                                        {resume.generation_cost && (
-                                          <span className="text-xs text-green-700 bg-green-100 px-1 py-1 rounded">
-                                            ${resume.generation_cost.toFixed(3)}
-                                          </span>
-                                        )}
-                                      </div>
-                                      
-                                      <div className="flex items-center space-x-1">
-                                        <span className="text-xs text-blue-600">
-                                          {formatDateShort(resume.created_at)}
-                                        </span>
-                                        <button
-                                          onClick={() => handleDownloadResume(resume.resume_data, 'pdf', item.company_name, item.role)}
-                                          className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-                                        >
-                                          <Download className="h-3 w-3" />
-                                          <span>PDF</span>
-                                        </button>
-                                        <button
-                                          onClick={() => handleDownloadResume(resume.resume_data, 'docx', item.company_name, item.role)}
-                                          className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
-                                        >
-                                          <Download className="h-3 w-3" />
-                                          <span>DOCX</span>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
                             {/* Resume History - Collapsed */}
-                            {!expandedItems.has(item.id) && item.resume_history.length > 0 && (
+                            {!expandedItems.has(item.id) && item.resume_count > 0 && (
                               <div className="flex items-center space-x-2">
                                 <span className="text-xs text-gray-500">
-                                  {item.resume_history.length} resume{item.resume_history.length > 1 ? 's' : ''} generated
+                                  {item.resume_count} resume{item.resume_count > 1 ? 's' : ''} generated
                                 </span>
-                                {item.resume_history[0] && (
+                                {item.latest_resume && (
                                   <div className="flex items-center space-x-1">
                                     <button
-                                      onClick={() => handleDownloadResume(item.resume_history[0].resume_data, 'pdf', item.company_name, item.role)}
+                                      onClick={() => handleDownloadResume(item.latest_resume!.resume_data, 'pdf', item.company_name, item.role)}
                                       className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                                     >
                                       <Download className="h-3 w-3" />
                                       <span>PDF</span>
                                     </button>
                                     <button
-                                      onClick={() => handleDownloadResume(item.resume_history[0].resume_data, 'docx', item.company_name, item.role)}
+                                      onClick={() => handleDownloadResume(item.latest_resume!.resume_data, 'docx', item.company_name, item.role)}
                                       className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
                                     >
                                       <Download className="h-3 w-3" />
@@ -911,7 +860,12 @@ export function History() {
               </div>
 
               <div className="p-4">
-                {selectedJobDetail ? (
+                {loadingJobDetail ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                    <p className="text-sm text-gray-600">Loading details...</p>
+                  </div>
+                ) : selectedJobDetail ? (
                   <div className="space-y-4">
                     {/* Company and Role */}
                     <div>
