@@ -291,7 +291,7 @@ Then create: "Led the development of the CustomerPortal Microservices Platform u
 - Achievement 4: 70-90 words - Collaboration/leadership
 - Achievement 5: 70-90 words - Process improvement
 
-5. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories.
+5. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories and don't make N/A or blink ones. Make at least 4 skills in each items.
 
 DOMAIN ADAPTATION STRATEGY:
 1. Analyze the job description to identify the primary domain and key technologies
@@ -348,21 +348,21 @@ Return ONLY this JSON:
     }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: Extract ALL programming languages from job description and add comprehensive related languages and frameworks",
-    "Frontend Development: Extract ALL frontend technologies from posting and add extensive related frameworks, libraries, and tools",
-    "Backend Technologies: Extract ALL backend frameworks from posting and add comprehensive related server technologies and architectures",
-    "Database Systems: Extract ALL database technologies from posting and add extensive related data management tools and platforms",
-    "Cloud Platforms: Extract ALL cloud services from posting and add comprehensive related cloud technologies and services",
-    "DevOps & Infrastructure: Extract ALL DevOps tools from posting and add extensive related automation and infrastructure technologies",
-    "Development Tools: Extract ALL development tools from posting and add comprehensive related productivity and collaboration tools",
-    "Testing & Quality Assurance: Extract ALL testing frameworks from posting and add extensive related QA tools and methodologies",
-    "API Development: Extract ALL API technologies from posting and add comprehensive related integration protocols and tools",
-    "Monitoring & Analytics: Extract ALL monitoring tools from posting and add extensive related observability and analytics platforms",
-    "Security & Compliance: Extract ALL security frameworks from posting and add comprehensive related security tools and practices",
-    "Data Science & Analytics: Extract ALL data tools from posting and add extensive related analytics and machine learning technologies",
-    "Mobile Development: Extract ALL mobile technologies from posting and add comprehensive related mobile frameworks and tools",
-    "Emerging Technologies: Extract ALL emerging tech from posting and add extensive related innovative tools and platforms",
-    "Methodologies & Practices: Extract ALL methodologies from posting and add comprehensive related development practices and frameworks"
+    "Programming Languages: Extract ALL programming languages from job description and add at least 4 comprehensive related languages and frameworks",
+    "Frontend Development: Extract ALL frontend technologies from posting and add at least 4 extensive related frameworks, libraries, and tools",
+    "Backend Technologies: Extract ALL backend frameworks from posting and add at least 4 comprehensive related server technologies and architectures",
+    "Database Systems: Extract ALL database technologies from posting and add at least 4 extensive related data management tools and platforms",
+    "Cloud Platforms: Extract ALL cloud services from posting and add at least 4 comprehensive related cloud technologies and services",
+    "DevOps & Infrastructure: Extract ALL DevOps tools from posting and add at least 4 extensive related automation and infrastructure technologies",
+    "Development Tools: Extract ALL development tools from posting and add at least 4 comprehensive related productivity and collaboration tools",
+    "Testing & Quality Assurance: Extract ALL testing frameworks from posting and add at least 4 extensive related QA tools and methodologies",
+    "API Development: Extract ALL API technologies from posting and add at least 4 comprehensive related integration protocols and tools",
+    "Monitoring & Analytics: Extract ALL monitoring tools from posting and add at least 4 extensive related observability and analytics platforms",
+    "Security & Compliance: Extract ALL security frameworks from posting and add at least 4 comprehensive related security tools and practices",
+    "Data Science & Analytics: Extract ALL data tools from posting and add at least 4 extensive related analytics and machine learning technologies",
+    "Mobile Development: Extract ALL mobile technologies from posting and add at least 4 comprehensive related mobile frameworks and tools",
+    "Emerging Technologies: Extract ALL emerging tech from posting and add at least 4 extensive related innovative tools and platforms",
+    "Methodologies & Practices: Extract ALL methodologies from posting and add at least 4 comprehensive related development practices and frameworks"
   ]
 }`
 }
