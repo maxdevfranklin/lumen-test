@@ -1,12 +1,12 @@
 /*
-  # Enhanced Job-Focused Resume Generation
+  # Enhanced Job-Focused Resume Generation with Longer Sentences
 
   This edge function creates highly targeted, keyword-optimized resumes by:
-  1. Analyzing job description for domain, role, and key requirements
-  2. Generating domain-specific project names and technical content
-  3. Maximum keyword integration while maintaining natural language
-  4. Adaptive content based on job type (frontend, backend, fullstack, data, etc.)
-  5. Optimized for token limits while maximizing content quality
+  1. Generating longer, comprehensive sentences (120-180 words for projects, 90-120 words for other achievements)
+  2. Maximum keyword integration with 100% job description matching
+  3. Domain-specific project names that align perfectly with job requirements
+  4. First achievement of first company gets priority focus with maximum keyword density
+  5. Natural language flow while maximizing ATS optimization
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
 
     if (settings.preferred_ai === 'anthropic' && !settings.anthropic_key) {
       return new Response(
-        JSON.stringify({ error: 'Anthropic is selected as preferred AI but no Anthropic API key is configured. Please add your Anthropic API key or switch to OpenAI.' }),
+        JSON.stringify({ error: 'Anthropic is selected as preferred AI but no Anthropic API key is configured. Please add your Anthropic API key or switch to Anthropic.' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with enhanced job-focused prompt
+    // Generate AI content with enhanced longer sentences
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure ALL companies get achievements
@@ -227,7 +227,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createJobFocusedPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createLongerSentencePrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -245,20 +245,19 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createJobFocusedPrompt(
+function createLongerSentencePrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
-  return `You are an expert ATS resume writer. Create a highly targeted resume that maximizes keyword matching with the job description while maintaining natural, professional language.
+  return `Expert ATS resume writer: Create comprehensive, keyword-rich content with longer sentences that maximize job description keyword integration.
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-CANDIDATE PROFILE:
-Name: ${profile.name}
-Contact: ${profile.email} | ${profile.phone} | ${profile.location}
+CANDIDATE:
+${profile.name} | ${profile.email} | ${profile.phone} | ${profile.location}
 
 WORK HISTORY:
 ${workExperiences.map((work, i) => `${i + 1}. ${work.company} - ${work.position} (${work.start_date} to ${work.is_current ? 'Present' : work.end_date})`).join('\n')}
@@ -266,117 +265,118 @@ ${workExperiences.map((work, i) => `${i + 1}. ${work.company} - ${work.position}
 EDUCATION:
 ${educations.map(edu => `${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})`).join('\n')}
 
-CRITICAL REQUIREMENTS:
+CRITICAL INSTRUCTIONS:
 
-1. PROFESSIONAL TITLE: Use the exact job title from the posting + 2-3 key technologies mentioned
+1. PROFESSIONAL TITLE: Exact job title from posting + 2-3 primary technologies mentioned
 
-2. PROFESSIONAL SUMMARY: Write 6-7 comprehensive sentences (180-220 words) that:
-   - Mirror the job description's language and requirements
-   - Include ALL major keywords and technologies mentioned
-   - Highlight relevant experience years and domain expertise
-   - Mention specific methodologies, frameworks, and tools from the posting
-   - Sound natural while maximizing keyword density
+2. PROFESSIONAL SUMMARY: 6-7 comprehensive sentences (200-250 words) with maximum keyword density from job description
 
-3. WORK ACHIEVEMENTS: For each company, create exactly 5 achievements:
-   
-   Achievement 1 (90-130 words): Real-world project that directly aligns with job requirements
-   - Create a specific project name that matches the job domain (e.g., "CustomerAnalytics Platform" for data roles, "E-commerce Checkout System" for frontend roles)
-   - Include exact technologies, frameworks, and tools mentioned in job description
-   - Describe scope, challenges, solutions, and quantified business impact
-   - Use terminology and language patterns from the job posting
-   
-   Achievement 2 (90-130 words): Another domain-specific project
-   - Different project name but still aligned with job requirements
-   - Focus on different technologies/skills mentioned in the posting
-   - Include team collaboration, methodologies, and technical leadership
-   - Quantified results and business value
-   
-   Achievement 3 (70-90 words): Technical excellence and problem-solving
-   - Highlight specific technical skills mentioned in job description
-   - Architecture, code quality, innovation, best practices
-   - Technical mentoring and knowledge sharing
-   
-   Achievement 4 (70-90 words): Collaboration and leadership
-   - Cross-functional work, stakeholder management
-   - Communication skills, team leadership
-   - Project management and delivery excellence
-   
-   Achievement 5 (70-90 words): Process improvement and strategic impact
-   - Methodologies and frameworks mentioned in job posting
-   - Efficiency improvements, innovation initiatives
-   - Strategic thinking and business impact
+3. WORK ACHIEVEMENTS - LONGER SENTENCES REQUIRED:
 
-4. TECHNICAL SKILLS: Extract ALL technologies from job description and organize into 15 comprehensive categories. Add related/similar technologies to maximize keyword coverage.
+For ${workExperiences[0]?.company || 'First Company'} (MOST IMPORTANT):
+Achievement 1 (120-180 words): PRIORITY ACHIEVEMENT - Must include maximum keywords from job description
+- Create specific project name that perfectly aligns with job domain and requirements
+- Include ALL major technologies, frameworks, and methodologies mentioned in job posting
+- Describe comprehensive scope, complex challenges, innovative solutions, and quantified business impact
+- Use exact terminology and language patterns from the job description
+- This is the MOST IMPORTANT achievement - pack maximum keywords naturally
 
-DOMAIN ADAPTATION RULES:
-- Frontend roles: Focus on UI/UX, responsive design, user experience projects
-- Backend roles: Emphasize APIs, databases, system architecture, scalability
-- Full-stack roles: Balance frontend and backend projects with integration focus
-- Data roles: Highlight analytics platforms, data pipelines, ML/AI projects
-- DevOps roles: Focus on infrastructure, automation, deployment projects
-- Mobile roles: Emphasize mobile apps, cross-platform development
-- Security roles: Highlight security frameworks, compliance, threat analysis
+Achievement 2 (120-180 words): Second major project with different focus
+- Different project name but still domain-aligned with job requirements
+- Highlight different technologies and skills from the job posting
+- Include extensive team collaboration, technical leadership, and cross-functional coordination
+- Quantified results, performance improvements, and strategic business value
 
-KEYWORD INTEGRATION STRATEGY:
-- Use exact phrases from job description when possible
-- Include synonyms and related terms for broader coverage
-- Maintain natural sentence flow while maximizing keyword density
-- Repeat important keywords across different sections
-- Use industry-standard terminology that matches the posting
+Achievement 3 (90-120 words): Technical excellence and innovation
+- Advanced technical skills and architecture decisions mentioned in job description
+- Code quality, best practices, technical mentoring, and knowledge sharing
+- Innovation initiatives and problem-solving approaches
 
-Return ONLY this JSON structure:
+Achievement 4 (90-120 words): Collaboration and leadership excellence
+- Cross-functional teamwork, stakeholder management, and communication skills
+- Project management, team leadership, and relationship building
+- Conflict resolution and delivery excellence
+
+Achievement 5 (90-120 words): Process improvement and strategic impact
+- Methodologies, frameworks, and strategic initiatives from job posting
+- Efficiency optimization, innovation projects, and transformational changes
+- Business impact and value-add capabilities
+
+For Additional Companies (if any):
+- Follow same pattern but with 100-150 words for projects, 80-100 words for other achievements
+- Maintain high keyword density while ensuring natural language flow
+
+4. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories with maximum keyword coverage.
+
+DOMAIN ADAPTATION:
+- Analyze job description to determine domain (frontend, backend, fullstack, data, DevOps, mobile, security, etc.)
+- Create project names that perfectly match the job domain and requirements
+- Use industry-specific terminology and technical language from the posting
+- Ensure all achievements align with the specific role requirements
+
+KEYWORD STRATEGY:
+- Use exact phrases and terminology from job description
+- Include ALL technologies, frameworks, methodologies, and tools mentioned
+- Add related and similar technologies for broader keyword coverage
+- Repeat important keywords across different sections naturally
+- Maintain professional tone while maximizing keyword density
+
+EXAMPLE FIRST ACHIEVEMENT (120-180 words):
+"Architected and led the development of the CustomerEngagement Analytics Platform, a comprehensive React.js, Node.js, and Python-based enterprise application serving over 100,000 daily active users across multiple geographic regions and business units, where I implemented advanced microservices architecture using Docker containers, Kubernetes orchestration, and AWS cloud infrastructure including EC2, RDS, and Lambda services, integrated real-time data synchronization capabilities through Redis caching, WebSocket connections, and Apache Kafka message streaming, collaborated extensively with cross-functional teams including product managers, UX/UI designers, data scientists, and QA engineers through Agile development methodologies, Scrum ceremonies, and continuous integration/continuous deployment (CI/CD) pipelines using Jenkins and GitLab, overcame complex scalability challenges by designing auto-scaling infrastructure with load balancing, database optimization, and performance monitoring using New Relic and DataDog, implemented comprehensive testing strategies including unit testing with Jest, integration testing, and end-to-end testing with Cypress, and successfully delivered the project 3 weeks ahead of schedule while achieving 99.9% uptime, 45% increase in user engagement metrics, 65% reduction in page load times, and $3.2M annual revenue impact through improved customer retention and conversion rates."
+
+Return ONLY this JSON:
 
 {
-  "professionalTitle": "Exact job title + key technologies from posting",
-  "professionalSummary": "6-7 comprehensive sentences (180-220 words) with maximum keyword integration from job description",
+  "professionalTitle": "Exact job title from posting with primary technologies",
+  "professionalSummary": "6-7 comprehensive sentences (200-250 words) integrating maximum keywords from job description naturally while highlighting years of experience, technical expertise, industry knowledge, leadership capabilities, and unique value proposition that directly matches job requirements",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "achievements": [
-        "90-130 word sentence describing domain-specific project with exact project name, technologies from job description, scope, challenges, solutions, and quantified results",
-        "90-130 word sentence about different project using other technologies from posting, team collaboration, technical leadership, and business impact",
-        "70-90 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "70-90 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "70-90 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "PRIORITY: 120-180 word comprehensive sentence describing the most important project that perfectly aligns with job requirements, including specific project name that matches job domain, ALL major technologies and frameworks from job description, detailed scope and user base, complex challenges and innovative solutions, extensive team collaboration and cross-functional coordination, advanced technical implementation details, and quantified business results with specific metrics and revenue impact",
+        "120-180 word detailed sentence about another significant project highlighting different technologies and skills from job posting, your technical leadership role in system design and implementation, comprehensive problem-solving approaches, innovative solutions and methodologies, extensive cross-functional collaboration with various stakeholders, measurable impact on business metrics and performance improvements, strategic value delivered to the organization, and long-term business benefits",
+        "90-120 word professional sentence emphasizing technical excellence, advanced architecture decisions, code quality standards, innovation initiatives, best practices implementation, technical mentoring and knowledge sharing, continuous learning and skill development, advanced problem-solving skills, and technical leadership that directly aligns with technical requirements mentioned in job description",
+        "90-120 word comprehensive sentence showcasing collaboration excellence, team leadership capabilities, stakeholder management skills, cross-functional coordination and communication, effective project management and delivery, conflict resolution and relationship building, mentoring and team development, and leadership qualities that demonstrate soft skills and management abilities mentioned in job description",
+        "90-120 word detailed sentence highlighting process improvements, strategic initiatives, methodology implementation and optimization, efficiency improvements and innovation projects, transformational changes and business impact, strategic thinking and planning, value-add capabilities and business acumen, and organizational impact that demonstrates strategic value mentioned in job posting requirements"
       ]
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "90-130 word sentence describing domain-specific project with exact project name, technologies from job description, scope, challenges, solutions, and quantified results",
-        "90-130 word sentence about different project using other technologies from posting, team collaboration, technical leadership, and business impact",
-        "70-90 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "70-90 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "70-90 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "100-150 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "100-150 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "80-100 word sentence highlighting technical excellence and specific skills mentioned in job description",
+        "80-100 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
+        "80-100 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
     {
       "company": "${work.company}",
       "achievements": [
-        "90-130 word sentence describing domain-specific project with exact project name, technologies from job description, scope, challenges, solutions, and quantified results",
-        "90-130 word sentence about different project using other technologies from posting, team collaboration, technical leadership, and business impact",
-        "70-90 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "70-90 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "70-90 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "100-150 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "100-150 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "80-100 word sentence highlighting technical excellence and specific skills mentioned in job description",
+        "80-100 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
+        "80-100 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
     }`).join('') : ''}
   ],
   "technicalSkills": [
-    "Programming Languages: ALL languages from job description + related languages",
-    "Frontend Technologies: ALL frontend tech from posting + related frameworks",
-    "Backend Technologies: ALL backend tech from posting + related frameworks",
-    "Database Systems: ALL databases from posting + related data technologies",
-    "Cloud Platforms: ALL cloud services from posting + related cloud tech",
-    "DevOps & Infrastructure: ALL DevOps tools from posting + related automation",
-    "Development Tools: ALL dev tools from posting + related productivity tools",
-    "Testing & Quality: ALL testing frameworks from posting + related QA tools",
-    "API & Integration: ALL API tech from posting + related protocols",
-    "Monitoring & Analytics: ALL monitoring tools from posting + related platforms",
-    "Security & Compliance: ALL security frameworks from posting + related tools",
-    "Data & Analytics: ALL data tools from posting + related analytics tech",
-    "Mobile Development: ALL mobile tech from posting + related frameworks",
-    "Emerging Technologies: ALL emerging tech from posting + related innovations",
-    "Methodologies: ALL methodologies from posting + related practices"
+    "Programming Languages: Extract ALL programming languages from job description and add comprehensive related languages and frameworks",
+    "Frontend Development: Extract ALL frontend technologies from posting and add extensive related frameworks, libraries, and tools",
+    "Backend Technologies: Extract ALL backend frameworks from posting and add comprehensive related server technologies and architectures",
+    "Database Systems: Extract ALL database technologies from posting and add extensive related data management tools and platforms",
+    "Cloud Platforms: Extract ALL cloud services from posting and add comprehensive related cloud technologies and services",
+    "DevOps & Infrastructure: Extract ALL DevOps tools from posting and add extensive related automation and infrastructure technologies",
+    "Development Tools: Extract ALL development tools from posting and add comprehensive related productivity and collaboration tools",
+    "Testing & Quality Assurance: Extract ALL testing frameworks from posting and add extensive related QA tools and methodologies",
+    "API Development: Extract ALL API technologies from posting and add comprehensive related integration protocols and tools",
+    "Monitoring & Analytics: Extract ALL monitoring tools from posting and add extensive related observability and analytics platforms",
+    "Security & Compliance: Extract ALL security frameworks from posting and add comprehensive related security tools and practices",
+    "Data Science & Analytics: Extract ALL data tools from posting and add extensive related analytics and machine learning technologies",
+    "Mobile Development: Extract ALL mobile technologies from posting and add comprehensive related mobile frameworks and tools",
+    "Emerging Technologies: Extract ALL emerging tech from posting and add extensive related innovative tools and platforms",
+    "Methodologies & Practices: Extract ALL methodologies from posting and add comprehensive related development practices and frameworks"
   ]
 }`
 }
@@ -408,7 +408,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS resume writer specializing in keyword optimization. Create natural, professional content that maximizes job description keyword matching. Focus on domain-specific projects with exact project names, comprehensive technical details, and quantified business results. Maintain current sentence lengths (90-130 words for projects, 70-90 words for other achievements). Extract ALL technologies from job descriptions and add related technologies for comprehensive keyword coverage.'
+          content: 'You are an expert ATS resume writer creating comprehensive, keyword-rich content with longer sentences. Write detailed professional achievements (120-180 words for priority projects, 90-120 words for other achievements) that maximize keyword integration from job descriptions. The first achievement of the first company is MOST IMPORTANT and must include maximum keywords. Create natural, compelling sentences with specific technologies, quantified results, and business impact. Focus on comprehensive project descriptions with exact project names, scope, challenges, solutions, and measurable outcomes. Extract ALL technologies from job descriptions and add related technologies for maximum keyword coverage.'
         },
         {
           role: 'user',
@@ -416,7 +416,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 3200
+      max_tokens: 3800
     })
   })
 
@@ -447,19 +447,20 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 3200,
+      max_tokens: 3800,
       messages: [
         {
           role: 'user',
           content: `${prompt}
 
-CRITICAL INSTRUCTIONS:
-- Analyze job description domain and adapt project names accordingly
-- Use exact keywords and phrases from job description throughout content
-- Create realistic, domain-specific project names that align with job requirements
-- Maintain current sentence lengths: 90-130 words for projects, 70-90 words for other achievements
+CRITICAL REQUIREMENTS:
+- Write longer, comprehensive sentences: 120-180 words for first two achievements, 90-120 words for others
+- First achievement of first company is MOST IMPORTANT - pack maximum keywords from job description
+- Analyze job description domain and create perfectly aligned project names
+- Use exact keywords and phrases from job description throughout all content
 - Extract ALL technologies from job description and add comprehensive related technologies
-- Ensure natural language flow while maximizing keyword density
+- Maintain natural language flow while maximizing keyword density for ATS optimization
+- Create realistic, domain-specific project names that align with job requirements
 - Return ONLY valid JSON with no additional text or formatting`
         }
       ]
