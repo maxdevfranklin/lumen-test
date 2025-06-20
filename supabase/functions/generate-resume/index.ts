@@ -281,10 +281,6 @@ For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 - Focus on the exact skills and technologies the job requires
 - Make it unique and memorable
 
-EXAMPLE ANALYSIS:
-If job description mentions: "React, Node.js, AWS, microservices, API development, team leadership"
-Then create: "Led the development of the CustomerPortal Microservices Platform using React.js and Node.js, serving 25,000+ daily users through AWS cloud infrastructure, where I architected scalable API endpoints, implemented microservices architecture, collaborated with cross-functional teams of 8 engineers, and delivered 40% performance improvement resulting in $1.2M annual cost savings."
-
 4. OTHER ACHIEVEMENTS (Keep current structure):
 - Achievement 2: 90-120 words - Different project focus
 - Achievement 3: 70-90 words - Technical excellence
