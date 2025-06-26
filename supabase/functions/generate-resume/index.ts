@@ -273,7 +273,7 @@ CRITICAL INSTRUCTIONS:
 3. FIRST ACHIEVEMENT FOCUS (MOST IMPORTANT):
 For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 - Create a PERFECT project name that directly aligns with the job description domain
-- Write 90-110 words (not too long, not too short)
+- Write 50-70 words (not too long, not too short)
 - Include the TOP 5-7 most important keywords/technologies from the job description
 - Make it sound realistic and impressive to recruiters
 - Include specific metrics and business impact
@@ -282,10 +282,10 @@ For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 - Make it unique and memorable
 
 4. OTHER ACHIEVEMENTS (Keep current structure):
-- Achievement 2: 90-120 words - Different project focus
-- Achievement 3: 70-90 words - Technical excellence
-- Achievement 4: 70-90 words - Collaboration/leadership
-- Achievement 5: 70-90 words - Process improvement
+- Achievement 2: 50-70 words - Different project focus
+- Achievement 3: 40-60 words - Technical excellence
+- Achievement 4: 35-60 words - Collaboration/leadership
+- Achievement 5: 30-60 words - Process improvement
 
 5. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories and don't make N/A or blink ones. Make at least 4 skills in each items.
 
@@ -310,7 +310,7 @@ Return ONLY this JSON:
 
 {
   "professionalTitle": "Exact job title from posting with primary technologies",
-  "professionalSummary": "6-7 comprehensive sentences (200-250 words) integrating maximum keywords from job description naturally while highlighting years of experience, technical expertise, industry knowledge, leadership capabilities, and unique value proposition that directly matches job requirements",
+  "professionalSummary": "6-7 comprehensive sentences (50-70 words) integrating maximum keywords from job description naturally while highlighting years of experience, technical expertise, industry knowledge, leadership capabilities, and unique value proposition that directly matches job requirements",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
@@ -325,21 +325,21 @@ Return ONLY this JSON:
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "90-120 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "90-120 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
-        "70-90 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "70-90 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "70-90 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "50-70 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "50-70 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
+        "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
+        "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
     {
       "company": "${work.company}",
       "achievements": [
-        "90-120 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "90-120 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
-        "70-90 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "70-90 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "70-90 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "50-70 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "50-70 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
+        "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
+        "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
     }`).join('') : ''}
   ],
@@ -436,7 +436,7 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
           content: `${prompt}
 
 CRITICAL FOCUS FOR FIRST ACHIEVEMENT:
-- Write exactly 90-110 words (perfect length for readability)
+- Write exactly 70-90 words (perfect length for readability)
 - Use only the TOP 5-7 most important keywords from job description
 - Create a realistic project name that perfectly matches the job domain
 - Include specific, believable metrics and business impact
