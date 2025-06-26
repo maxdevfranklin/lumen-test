@@ -17,7 +17,11 @@ import {
   Shield,
   AlertCircle,
   Eye,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Clock
 } from 'lucide-react'
 import { downloadPDF, downloadDocx } from '../services/fileGenerator'
 
@@ -92,6 +96,7 @@ export function Manage() {
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set())
 
   // Check if current user is admin
   const isAdmin = user?.email === 'max.franklin.tech@gmail.com'
@@ -221,6 +226,7 @@ export function Manage() {
 
   const handleUserSelect = (user: UserProfile) => {
     setSelectedUser(user)
+    setExpandedJobs(new Set()) // Reset expanded jobs when selecting new user
     loadUserDetails(user)
   }
 
@@ -235,6 +241,16 @@ export function Manage() {
       console.error('Error downloading resume:', error)
       alert('Error downloading resume. Please try again.')
     }
+  }
+
+  const toggleJobExpansion = (jobId: string) => {
+    const newExpanded = new Set(expandedJobs)
+    if (newExpanded.has(jobId)) {
+      newExpanded.delete(jobId)
+    } else {
+      newExpanded.add(jobId)
+    }
+    setExpandedJobs(newExpanded)
   }
 
   const filteredUsers = users.filter(user =>
@@ -258,6 +274,14 @@ export function Manage() {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const calculateTotalCost = (jobHistory: JobHistory[]) => {
+    return jobHistory.reduce((total, job) => {
+      return total + job.resume_history.reduce((jobTotal, resume) => {
+        return jobTotal + (resume.generation_cost || 0)
+      }, 0)
+    }, 0)
   }
 
   if (!user) {
@@ -370,7 +394,7 @@ export function Manage() {
                           <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                             <span>{user.work_experience_count} jobs</span>
                             <span>{user.education_count} edu</span>
-                            <span>{user.resume_count} resumes</span>
+                            <span className="font-medium text-blue-600">{user.resume_count} resumes</span>
                           </div>
                         </div>
                         <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -440,6 +464,184 @@ export function Manage() {
                   </div>
                 ) : userDetails ? (
                   <>
+                    {/* Job Applications & Resume History - MAIN FOCUS */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                          <FileText className="h-5 w-5 mr-2" />
+                          Job Applications & Resume History
+                        </h3>
+                        {userDetails.jobHistory.length > 0 && (
+                          <div className="flex items-center space-x-4 text-sm">
+                            <div className="flex items-center space-x-1">
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                              <span className="text-green-700 font-medium">
+                                ${calculateTotalCost(userDetails.jobHistory).toFixed(2)} total cost
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-4 w-4 text-blue-600" />
+                              <span className="text-blue-700 font-medium">
+                                {userDetails.jobHistory.length} applications
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {userDetails.jobHistory.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Building className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                          <h4 className="text-lg font-medium text-gray-900 mb-2">No Job Applications</h4>
+                          <p className="text-gray-500">This user hasn't applied to any jobs yet.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {userDetails.jobHistory.map((job) => (
+                            <div key={job.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                              {/* Job Header */}
+                              <div 
+                                className="p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                                onClick={() => toggleJobExpansion(job.id)}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-3 mb-2">
+                                      <h4 className="font-semibold text-gray-900">{job.role}</h4>
+                                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                        {job.company_name}
+                                      </span>
+                                      {job.resume_history.length > 0 && (
+                                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
+                                          {job.resume_history.length} resume{job.resume_history.length !== 1 ? 's' : ''}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                      <span className="flex items-center space-x-1">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>{formatDateTime(job.created_at)}</span>
+                                      </span>
+                                      {job.resume_history.length > 0 && (
+                                        <span className="flex items-center space-x-1">
+                                          <DollarSign className="h-4 w-4" />
+                                          <span>
+                                            ${job.resume_history.reduce((sum, r) => sum + (r.generation_cost || 0), 0).toFixed(2)}
+                                          </span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {job.resume_history.length > 0 && (
+                                      <div className="flex space-x-1">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDownloadResume(job.resume_history[0].resume_data, 'pdf', job.company_name, job.role)
+                                          }}
+                                          className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                                        >
+                                          <Download className="h-3 w-3" />
+                                          <span>PDF</span>
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDownloadResume(job.resume_history[0].resume_data, 'docx', job.company_name, job.role)
+                                          }}
+                                          className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
+                                        >
+                                          <Download className="h-3 w-3" />
+                                          <span>DOCX</span>
+                                        </button>
+                                      </div>
+                                    )}
+                                    {expandedJobs.has(job.id) ? (
+                                      <ChevronUp className="h-5 w-5 text-gray-400" />
+                                    ) : (
+                                      <ChevronDown className="h-5 w-5 text-gray-400" />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Expanded Job Details */}
+                              {expandedJobs.has(job.id) && (
+                                <div className="p-4 border-t border-gray-200">
+                                  {/* Note */}
+                                  {job.note && (
+                                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                                      <p className="text-sm text-yellow-800">
+                                        <strong>Personal Note:</strong> {job.note}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Job Description */}
+                                  <div className="mb-4">
+                                    <h5 className="text-sm font-medium text-gray-700 mb-2">Job Description</h5>
+                                    <div className="max-h-32 overflow-y-auto bg-gray-50 border border-gray-200 rounded p-3">
+                                      <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                        {job.job_description}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Resume History */}
+                                  {job.resume_history.length > 0 && (
+                                    <div>
+                                      <h5 className="text-sm font-medium text-gray-700 mb-3">
+                                        Generated Resumes ({job.resume_history.length})
+                                      </h5>
+                                      <div className="space-y-3">
+                                        {job.resume_history.map((resume, index) => (
+                                          <div key={resume.id} className="flex items-center justify-between bg-white border border-gray-200 rounded p-3">
+                                            <div className="flex items-center space-x-3">
+                                              <span className="text-sm font-medium text-gray-600">
+                                                #{index + 1}
+                                              </span>
+                                              <span className="text-xs font-medium text-blue-900 bg-blue-100 px-2 py-1 rounded">
+                                                {resume.ai_provider === 'openai' ? 'OpenAI' : 'Anthropic'}
+                                              </span>
+                                              {resume.generation_cost && (
+                                                <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">
+                                                  ${resume.generation_cost.toFixed(3)}
+                                                </span>
+                                              )}
+                                              <span className="text-xs text-gray-500">
+                                                {formatDateTime(resume.created_at)}
+                                              </span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                              <button
+                                                onClick={() => handleDownloadResume(resume.resume_data, 'pdf', job.company_name, job.role)}
+                                                className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                                              >
+                                                <Download className="h-3 w-3" />
+                                                <span>PDF</span>
+                                              </button>
+                                              <button
+                                                onClick={() => handleDownloadResume(resume.resume_data, 'docx', job.company_name, job.role)}
+                                                className="flex items-center space-x-1 px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
+                                              >
+                                                <Download className="h-3 w-3" />
+                                                <span>DOCX</span>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Work Experience */}
                     {userDetails.workExperiences.length > 0 && (
                       <div className="bg-white rounded-lg shadow-md p-6">
@@ -484,81 +686,6 @@ export function Manage() {
                                   {formatDate(edu.start_date)} - {formatDate(edu.end_date)}
                                 </span>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Job Applications & Resume History */}
-                    {userDetails.jobHistory.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-md p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                          <FileText className="h-5 w-5 mr-2" />
-                          Job Applications & Resume History
-                        </h3>
-                        <div className="space-y-6">
-                          {userDetails.jobHistory.map((job) => (
-                            <div key={job.id} className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex justify-between items-start mb-3">
-                                <div>
-                                  <h4 className="font-medium text-gray-900">{job.role}</h4>
-                                  <p className="text-blue-600">{job.company_name}</p>
-                                  <span className="text-sm text-gray-500">{formatDateTime(job.created_at)}</span>
-                                </div>
-                                <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                                  {job.resume_history.length} resume{job.resume_history.length !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-
-                              {job.note && (
-                                <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                                  <p className="text-sm text-yellow-800"><strong>Note:</strong> {job.note}</p>
-                                </div>
-                              )}
-
-                              <div className="mb-3">
-                                <p className="text-sm text-gray-600 line-clamp-3">{job.job_description}</p>
-                              </div>
-
-                              {job.resume_history.length > 0 && (
-                                <div className="space-y-2">
-                                  <h5 className="text-sm font-medium text-gray-700">Generated Resumes:</h5>
-                                  {job.resume_history.map((resume) => (
-                                    <div key={resume.id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                                      <div className="flex items-center space-x-3">
-                                        <span className="text-xs font-medium text-blue-900 bg-blue-100 px-2 py-1 rounded">
-                                          {resume.ai_provider === 'openai' ? 'OpenAI' : 'Anthropic'}
-                                        </span>
-                                        {resume.generation_cost && (
-                                          <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">
-                                            ${resume.generation_cost.toFixed(3)}
-                                          </span>
-                                        )}
-                                        <span className="text-xs text-gray-500">
-                                          {formatDateTime(resume.created_at)}
-                                        </span>
-                                      </div>
-                                      <div className="flex space-x-2">
-                                        <button
-                                          onClick={() => handleDownloadResume(resume.resume_data, 'pdf', job.company_name, job.role)}
-                                          className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-                                        >
-                                          <Download className="h-3 w-3" />
-                                          <span>PDF</span>
-                                        </button>
-                                        <button
-                                          onClick={() => handleDownloadResume(resume.resume_data, 'docx', job.company_name, job.role)}
-                                          className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
-                                        >
-                                          <Download className="h-3 w-3" />
-                                          <span>DOCX</span>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
                             </div>
                           ))}
                         </div>
