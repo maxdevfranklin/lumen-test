@@ -1,11 +1,14 @@
 import React from 'react'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { FileText, Settings, LogOut, User, History, Zap } from 'lucide-react'
+import { FileText, Settings, LogOut, User, History, Zap, Users } from 'lucide-react'
 
 export function Layout() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+
+  // Check if current user is admin
+  const isAdmin = user?.email === 'max.franklin.tech@gmail.com'
 
   const handleSignOut = async () => {
     await signOut()
@@ -47,6 +50,15 @@ export function Layout() {
                   <History className="h-4 w-4" />
                   <span>History</span>
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/manage"
+                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Manage</span>
+                  </Link>
+                )}
                 <Link
                   to="/settings"
                   className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
