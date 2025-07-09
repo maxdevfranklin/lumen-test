@@ -252,6 +252,13 @@ function createPerfectFirstAchievementPrompt(
 ): string {
   return `Expert ATS resume writer: Create a perfect first achievement that 100% matches the job description and attracts recruiters.
 
+⚠️ CRITICAL ANTI-AI-DETECTION RULES:
+- NEVER copy company names, team names, product names, or specific organizational details from the job description
+- INSTEAD, create project names using the companies where the candidate ACTUALLY WORKED
+- Use format like "[Company Name] [Project Type]" - e.g., "BaileyTech Customer Portal", "StayAI Analytics Platform"
+- Make achievements sound like authentic work experience from their actual previous companies
+- This ensures realistic, believable project names that sound like real work history
+
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -272,7 +279,7 @@ CRITICAL INSTRUCTIONS:
 
 3. FIRST ACHIEVEMENT FOCUS (MOST IMPORTANT):
 For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
-- Create a PERFECT project name that directly aligns with the job description domain
+- Create a PERFECT project name using "${workExperiences[0]?.company || 'Company'} [Project Type]" format (e.g., "${workExperiences[0]?.company || 'BaileyTech'} Customer Platform" or "${workExperiences[0]?.company || 'StayAI'} Analytics Dashboard")
 - Write 50-70 words (not too long, not too short)
 - Include the TOP 5-7 most important keywords/technologies from the job description
 - Make it sound realistic and impressive to recruiters
@@ -280,6 +287,8 @@ For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 - Use natural, professional language that flows well
 - Focus on the exact skills and technologies the job requires
 - Make it unique and memorable
+- ENSURE it sounds like authentic work experience at ${workExperiences[0]?.company || 'their previous company'}
+- NEVER use project names from the job description - only from candidate's actual work history
 
 4. OTHER ACHIEVEMENTS (Keep current structure):
 - Achievement 2: 50-70 words - Different project focus
@@ -290,12 +299,13 @@ For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 5. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories and don't make N/A or blink ones. Make at least 4 skills in each items.
 
 DOMAIN ADAPTATION STRATEGY:
-1. Analyze the job description to identify the primary domain and key technologies
-2. Create a project name that perfectly fits the job requirements
-3. Use the exact terminology and language from the job posting
+1. Analyze the job description to identify the primary domain and key technologies needed
+2. Create project names using the candidate's ACTUAL company names in format "[Company Name] [Project Type]"
+3. Use technical terminology and methodologies from the job posting, but NEVER copy company/product names from the job description
 4. Focus on the most important 5-7 keywords rather than trying to fit everything
-5. Make it sound realistic and achievable
-6. Include impressive but believable metrics
+5. Make project names sound realistic for what could be built at their actual previous companies
+6. Include impressive but believable metrics that could realistically be achieved at those companies
+7. Ensure achievements sound authentic to their actual work history, making it undetectable as AI-generated
 
 FIRST ACHIEVEMENT REQUIREMENTS:
 - 90-110 words (perfect length)
@@ -315,7 +325,7 @@ Return ONLY this JSON:
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "achievements": [
-        "PERFECT FIRST ACHIEVEMENT: 90-110 word sentence describing a specific project that perfectly aligns with job requirements, using a realistic project name that matches the job domain, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics, highlighting key technical implementations and solutions, demonstrating team collaboration and leadership, and showcasing quantified business results with impressive but believable metrics that directly relate to the value this role would bring to the hiring company",
+        "PERFECT FIRST ACHIEVEMENT: 90-110 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics, highlighting key technical implementations and solutions, demonstrating team collaboration and leadership, and showcasing quantified business results with impressive but believable metrics that sound authentic to working at ${workExperiences[0]?.company || 'this company'}",
         "90-120 word detailed sentence about another significant project highlighting different technologies and skills from job posting, your technical leadership role in system design and implementation, comprehensive problem-solving approaches, innovative solutions and methodologies, extensive cross-functional collaboration with various stakeholders, measurable impact on business metrics and performance improvements, strategic value delivered to the organization, and long-term business benefits",
         "70-90 word professional sentence emphasizing technical excellence, advanced architecture decisions, code quality standards, innovation initiatives, best practices implementation, technical mentoring and knowledge sharing, continuous learning and skill development, advanced problem-solving skills, and technical leadership that directly aligns with technical requirements mentioned in job description",
         "70-90 word comprehensive sentence showcasing collaboration excellence, team leadership capabilities, stakeholder management skills, cross-functional coordination and communication, effective project management and delivery, conflict resolution and relationship building, mentoring and team development, and leadership qualities that demonstrate soft skills and management abilities mentioned in job description",
@@ -325,8 +335,8 @@ Return ONLY this JSON:
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
       "achievements": [
-        "50-70 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "50-70 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "50-70 word comprehensive sentence describing domain-specific project using '${workExperiences[1]?.company || 'CompanyName'} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "50-70 word detailed sentence about different ${workExperiences[1]?.company || 'company'} project using other technologies from posting, technical leadership, collaboration, and business impact",
         "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
         "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
         "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
@@ -335,8 +345,8 @@ Return ONLY this JSON:
     {
       "company": "${work.company}",
       "achievements": [
-        "50-70 word comprehensive sentence describing domain-specific project with exact project name, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "50-70 word detailed sentence about different project using other technologies from posting, technical leadership, collaboration, and business impact",
+        "50-70 word comprehensive sentence describing domain-specific project using '${work.company} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
+        "50-70 word detailed sentence about different ${work.company} project using other technologies from posting, technical leadership, collaboration, and business impact",
         "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
         "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
         "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
@@ -386,11 +396,11 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS resume writer. Your specialty is creating the PERFECT first achievement that 100% matches job descriptions and attracts recruiters. Focus on creating a realistic, impressive project (90-110 words) that uses the TOP 5-7 keywords from the job description naturally. Make it unique, memorable, and professionally compelling. The first achievement is the MOST IMPORTANT - it must perfectly align with what the job requires while sounding natural and achievable.'
+          content: 'You are an expert ATS resume writer. Your specialty is creating the PERFECT first achievement that 100% matches job descriptions and attracts recruiters. CRITICAL: NEVER use company names, team names, or specific organizational details from the job description. Instead, create generic but impressive project names that demonstrate the same expertise. Focus on creating a realistic, impressive project (90-110 words) that uses the TOP 5-7 keywords from the job description naturally. Make it unique, memorable, and professionally compelling while ensuring it cannot be identified as AI-generated.'
         },
         {
           role: 'user',
@@ -398,7 +408,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 3500
+      max_tokens: 6000
     })
   })
 
@@ -428,8 +438,8 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 3500,
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 6000,
       messages: [
         {
           role: 'user',
@@ -438,13 +448,15 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
 CRITICAL FOCUS FOR FIRST ACHIEVEMENT:
 - Write exactly 70-90 words (perfect length for readability)
 - Use only the TOP 5-7 most important keywords from job description
-- Create a realistic project name that perfectly matches the job domain
+- NEVER use company names, team names, or specific organizational details from the job description
+- Create generic but impressive project names that demonstrate the same expertise and domain knowledge
 - Include specific, believable metrics and business impact
-- Make it sound natural and professional, not keyword-stuffed
-- Focus on what makes this candidate perfect for THIS specific job
+- Make it sound natural and professional, not keyword-stuffed or AI-generated
+- Focus on what makes this candidate perfect for THIS specific job without copying specific details
 - Make it unique and memorable to stand out to recruiters
+- Ensure achievements sound authentic and could realistically come from the candidate's actual experience
 
-The first achievement is the MOST IMPORTANT part of the entire resume. It must be perfect.
+The first achievement is the MOST IMPORTANT part of the entire resume. It must be perfect and undetectable as AI-generated.
 
 Return ONLY valid JSON with no additional text or formatting.`
         }
