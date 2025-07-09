@@ -9,6 +9,7 @@ import { Profile } from './pages/Profile'
 import { Generate } from './pages/Generate'
 import { History } from './pages/History'
 import { Settings } from './pages/Settings'
+import { Manage } from './pages/Manage'
 
 function App() {
   return (
@@ -32,6 +33,11 @@ function App() {
             <Route path="history" element={
               <ProtectedRoute>
                 <History />
+              </ProtectedRoute>
+            } />
+            <Route path="manage" element={
+              <ProtectedRoute>
+                <Manage />
               </ProtectedRoute>
             } />
             <Route path="settings" element={
