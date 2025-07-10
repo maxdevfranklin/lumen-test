@@ -49,7 +49,6 @@ export function Generate() {
   const [preferredAI, setPreferredAI] = useState<'openai' | 'anthropic'>('openai')
   const [generationCost, setGenerationCost] = useState<number | null>(null)
   const [currentJobHistoryId, setCurrentJobHistoryId] = useState<string | null>(null)
-  const [customRoles, setCustomRoles] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     if (user) {
@@ -76,15 +75,6 @@ export function Generate() {
           .eq('profile_id', profileData.id)
 
         setWorkExperienceCount(workData?.length || 0)
-        
-        // Initialize custom roles with current positions
-        if (workData && workData.length > 0) {
-          const roles: { [key: string]: string } = {}
-          workData.forEach((work: any, index: number) => {
-            roles[`work_${index}`] = work.position || ''
-          })
-          setCustomRoles(roles)
-        }
       }
 
       // Check if settings exist
@@ -101,13 +91,6 @@ export function Generate() {
     } catch (error) {
       console.error('Error checking requirements:', error)
     }
-  }
-
-  const updateCustomRole = (workIndex: number, newRole: string) => {
-    setCustomRoles(prev => ({
-      ...prev,
-      [`work_${workIndex}`]: newRole
-    }))
   }
 
   const handleGenerate = async () => {
@@ -142,7 +125,7 @@ export function Generate() {
       setCurrentJobHistoryId(jobHistoryData.id)
 
       // Generate resume
-      const resume = await generateResume(jobDescription, user?.id!, customRoles)
+      const resume = await generateResume(jobDescription, user?.id!)
       setGeneratedResume(resume)
       
       // Calculate actual generation time and estimate cost
@@ -218,7 +201,6 @@ export function Generate() {
     setGeneratedResume(null)
     setGenerationCost(null)
     setCurrentJobHistoryId(null)
-    setCustomRoles({})
   }
 
   if (!hasProfile) {
@@ -337,37 +319,6 @@ export function Generate() {
                     placeholder="Add any personal notes about this application..."
                   />
                 </div>
-
-                {/* Custom Role Mapping */}
-                {workExperienceCount > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Customize Roles for This Job Application
-                    </label>
-                    <div className="space-y-3 bg-blue-50 border border-blue-200 rounded-md p-4">
-                      <p className="text-sm text-blue-700 mb-3">
-                        Adjust your job titles to better match the requirements of this specific role:
-                      </p>
-                      {Array.from({ length: workExperienceCount }, (_, index) => (
-                        <div key={index} className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-600 w-20">
-                            Job {index + 1}:
-                          </span>
-                          <input
-                            type="text"
-                            value={customRoles[`work_${index}`] || ''}
-                            onChange={(e) => updateCustomRole(index, e.target.value)}
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder={`Enter role title for position ${index + 1}`}
-                          />
-                        </div>
-                      ))}
-                      <p className="text-xs text-blue-600 mt-2">
-                        💡 Tip: Use keywords from the job description to make your roles more relevant
-                      </p>
-                    </div>
-                  </div>
-                )}
 
                 {/* Cost Estimator */}
                 <CostEstimator
