@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     }
 
     // Parse request body
-    const { jobDescription } = await req.json()
+    const { jobDescription, customRoles } = await req.json()
 
     if (!jobDescription) {
       return new Response(
@@ -160,17 +160,24 @@ Deno.serve(async (req) => {
     }
 
     // Generate AI content with perfect first achievement focus
-    const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
+    const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings, customRoles)
 
     // Map work experiences with achievements - ensure ALL companies get achievements
-    const mappedWorkExperiences = workExperiences.map((work, index) => ({
+    const mappedWorkExperiences = workExperiences.map((work, index) => {
+      // Use custom role if provided, otherwise use original position
+      const customRole = customRoles && customRoles[`work_${index}`] 
+        ? customRoles[`work_${index}`].trim() 
+        : work.position
+      
+      return {
       company: work.company,
-      position: work.position,
+      position: customRole,
       startDate: work.start_date,
       endDate: work.end_date,
       isCurrent: work.is_current,
       achievements: aiContent.workExperiences[index]?.achievements || []
-    }))
+      }
+    })
 
     const result = {
       ...aiContent,
@@ -224,9 +231,10 @@ async function generateWithAI(
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[],
-  settings: UserSettings
+  settings: UserSettings,
+  customRoles?: { [key: string]: string }
 ) {
-  const prompt = createPerfectFirstAchievementPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createPerfectFirstAchievementPrompt(jobDescription, profile, workExperiences, educations, customRoles)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -248,8 +256,17 @@ function createPerfectFirstAchievementPrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
-  educations: Education[]
+  educations: Education[],
+  customRoles?: { [key: string]: string }
 ): string {
+  // Create work history display with custom roles if provided
+  const workHistoryDisplay = workExperiences.map((work, i) => {
+    const displayRole = customRoles && customRoles[`work_${i}`] 
+      ? customRoles[`work_${i}`].trim() 
+      : work.position
+    return `${i + 1}. ${work.company} - ${displayRole} (${work.start_date} to ${work.is_current ? 'Present' : work.end_date})`
+  }).join('\n')
+
   return `Expert ATS resume writer: Create a perfect first achievement that 100% matches the job description and attracts recruiters.
 
 ⚠️ CRITICAL ANTI-AI-DETECTION RULES:
@@ -266,7 +283,7 @@ CANDIDATE:
 ${profile.name} | ${profile.email} | ${profile.phone} | ${profile.location}
 
 WORK HISTORY:
-${workExperiences.map((work, i) => `${i + 1}. ${work.company} - ${work.position} (${work.start_date} to ${work.is_current ? 'Present' : work.end_date})`).join('\n')}
+${workHistoryDisplay}
 
 EDUCATION:
 ${educations.map(edu => `${edu.university} - ${edu.degree} (${edu.start_date} to ${edu.end_date})`).join('\n')}
@@ -278,7 +295,7 @@ CRITICAL INSTRUCTIONS:
 2. PROFESSIONAL SUMMARY: 6-7 comprehensive sentences (200-250 words) with maximum keyword density from job description
 
 3. FIRST ACHIEVEMENT FOCUS (MOST IMPORTANT):
-For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
+For ${workExperiences[0]?.company || 'First Company'} - ${customRoles && customRoles['work_0'] ? customRoles['work_0'] : workExperiences[0]?.position || 'Position'} - Achievement 1:
 - Create a PERFECT project name using "${workExperiences[0]?.company || 'Company'} [Project Type]" format (e.g., "${workExperiences[0]?.company || 'BaileyTech'} Customer Platform" or "${workExperiences[0]?.company || 'StayAI'} Analytics Dashboard")
 - Write 50-70 words (not too long, not too short)
 - Include the TOP 5-7 most important keywords/technologies from the job description
@@ -324,6 +341,7 @@ Return ONLY this JSON:
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
+      "position": "${customRoles && customRoles['work_0'] ? customRoles['work_0'] : workExperiences[0]?.position || 'Position'}",
       "achievements": [
         "PERFECT FIRST ACHIEVEMENT: 90-110 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics, highlighting key technical implementations and solutions, demonstrating team collaboration and leadership, and showcasing quantified business results with impressive but believable metrics that sound authentic to working at ${workExperiences[0]?.company || 'this company'}",
         "90-120 word detailed sentence about another significant project highlighting different technologies and skills from job posting, your technical leadership role in system design and implementation, comprehensive problem-solving approaches, innovative solutions and methodologies, extensive cross-functional collaboration with various stakeholders, measurable impact on business metrics and performance improvements, strategic value delivered to the organization, and long-term business benefits",
@@ -334,6 +352,7 @@ Return ONLY this JSON:
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
+      "position": "${customRoles && customRoles['work_1'] ? customRoles['work_1'] : workExperiences[1]?.position || 'Position'}",
       "achievements": [
         "50-70 word comprehensive sentence describing domain-specific project using '${workExperiences[1]?.company || 'CompanyName'} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
         "50-70 word detailed sentence about different ${workExperiences[1]?.company || 'company'} project using other technologies from posting, technical leadership, collaboration, and business impact",
@@ -342,8 +361,12 @@ Return ONLY this JSON:
         "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work) => `,
+      const actualIndex = originalIndex + 2
+      const customRole = customRoles && customRoles[`work_${actualIndex}`] ? customRoles[`work_${actualIndex}`] : work.position
+      return `,
     {
       "company": "${work.company}",
+      "position": "${customRole}",
       "achievements": [
         "50-70 word comprehensive sentence describing domain-specific project using '${work.company} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
         "50-70 word detailed sentence about different ${work.company} project using other technologies from posting, technical leadership, collaboration, and business impact",
@@ -351,7 +374,8 @@ Return ONLY this JSON:
         "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
         "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
       ]
-    }`).join('') : ''}
+    }`
+    }).join('') : ''}
   ],
   "technicalSkills": [
     "Programming Languages: Extract ALL programming languages from job description and add at least 4 comprehensive related languages and frameworks",
