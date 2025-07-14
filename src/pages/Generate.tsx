@@ -491,7 +491,7 @@ export function Generate() {
                 <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Resume Preview</h3>
                 <p className="text-gray-500">
-                  Fill in the company details and job description, then click generate to see your tailored resume
+                  Fill in the company details and job description, then click generate to see your tailored resume 
                 </p>
               </div>
             )}
