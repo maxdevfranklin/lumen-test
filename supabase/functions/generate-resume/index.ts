@@ -359,7 +359,7 @@ Return ONLY this JSON:
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
-      "position": "RELEVANT role title that aligns with the job description's domain and technology focus - create titles that show logical career progression toward the target role",
+      "position": "DOMAIN-SPECIFIC role title that matches the job description's field and requirements - ensure career progression makes sense for the target role",
       "achievements": [
         {
           "description": "PERFECT FIRST ACHIEVEMENT: 50-60 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements and seniority level, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and metrics appropriate for the seniority level",
@@ -376,7 +376,7 @@ Return ONLY this JSON:
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
-      "position": "RELEVANT role title that aligns with the job description's domain and technology focus - create titles that show logical career progression toward the target role",
+      "position": "DOMAIN-SPECIFIC role title that matches the job description's field and requirements - ensure career progression makes sense for the target role",
       "achievements": [
         "STRONG Achievement 1: 60-80 word comprehensive sentence describing domain-specific project using '${workExperiences[1]?.company || 'CompanyName'} [Project Type]' format, technologies from job description, detailed scope appropriate to seniority level, challenges, solutions, and quantified results that demonstrate impact",
         "STRONG Achievement 2: 60-80 word detailed sentence about different ${workExperiences[1]?.company || 'company'} project using other technologies from posting, technical contributions appropriate to seniority level, collaboration, problem-solving, and measurable business impact with specific metrics",
@@ -388,7 +388,7 @@ Return ONLY this JSON:
       return `,
     {
       "company": "${work.company}",
-      "position": "RELEVANT role title that aligns with the job description's domain and technology focus - create titles that show logical career progression toward the target role",
+      "position": "DOMAIN-SPECIFIC role title that matches the job description's field and requirements - ensure career progression makes sense for the target role",
       "achievements": [
         "STRONG Achievement 1: 50-70 word comprehensive sentence describing domain-specific project using '${work.company} [Project Type]' format, technologies from job description, detailed scope appropriate to seniority level, challenges, solutions, and quantified results",
         "STRONG Achievement 2: 50-70 word detailed sentence about different ${work.company} project using other technologies from posting, technical contributions appropriate to seniority level, collaboration, and business impact",
