@@ -290,9 +290,16 @@ CRITICAL INSTRUCTIONS:
 2. PROFESSIONAL TITLE: Create a concise, simple title that perfectly matches the job description requirements and seniority level
 
 3. ROLE OPTIMIZATION: For each work experience, create role titles that match the job's seniority level:
-   - Junior level: "Software Developer", "Frontend Developer", "Backend Developer"
-   - Mid-level: "Software Engineer", "Full Stack Developer", "Systems Engineer"
-   - Senior level: "Senior Software Engineer", "Lead Developer", "Principal Engineer"
+   - ANALYZE the job title in the job description and create RELEVANT titles for each work experience
+   - If target job is "Product Manager", create titles like "Product Manager", "Associate Product Manager", "Business Analyst"
+   - If target job is "Frontend Engineer", create titles like "Frontend Engineer", "UI Developer", "JavaScript Developer"
+   - If target job is "Machine Learning Engineer", create titles like "ML Engineer", "Data Scientist", "Software Engineer"
+   - If target job is "DevOps Engineer", create titles like "DevOps Engineer", "Cloud Engineer", "Site Reliability Engineer"
+   - MATCH the domain, technology stack, and career progression that leads to the target role
+   - Most recent role should be very similar to the target job title
+   - If job posting is for "Data Scientist", create titles like "Data Scientist", "Machine Learning Engineer", "Data Analyst"
+   - Match the domain and technology focus, not just seniority level
+   - Most recent role should closely match the target job title
 
 4. ACHIEVEMENT STRENGTH FOR ALL COMPANIES:
    - Company 1 (Most Recent): 5 strong achievements with detailed structured format
