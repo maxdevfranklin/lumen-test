@@ -1,11 +1,11 @@
 /*
-  # Enhanced Job-Focused Resume Generation with Perfect First Achievement
+  # Enhanced Job-Focused Resume Generation with Proper Seniority Matching
 
   This edge function creates highly targeted, keyword-optimized resumes by:
-  1. Creating a perfect first achievement that 100% matches job description
-  2. Making it unique and attractive to recruiters
-  3. Maintaining natural language flow
-  4. Keeping other achievements unchanged
+  1. Creating strong achievements for ALL companies, not just the first one
+  2. Matching seniority level exactly to job requirements
+  3. Avoiding over-inflated senior language for mid-level positions
+  4. Maintaining natural language flow across all experiences
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate AI content with perfect first achievement focus
+    // Generate AI content with enhanced achievements for all companies
     const aiContent = await generateWithAI(jobDescription, profile, workExperiences, educations, settings)
 
     // Map work experiences with achievements - ensure ALL companies get achievements
@@ -226,7 +226,7 @@ async function generateWithAI(
   educations: Education[],
   settings: UserSettings
 ) {
-  const prompt = createPerfectFirstAchievementPrompt(jobDescription, profile, workExperiences, educations)
+  const prompt = createEnhancedPrompt(jobDescription, profile, workExperiences, educations)
   
   if (settings.preferred_ai === 'openai' && settings.openai_key) {
     return await generateWithOpenAI(prompt, settings.openai_key)
@@ -244,13 +244,22 @@ async function generateWithAI(
   throw new Error('No valid API key found')
 }
 
-function createPerfectFirstAchievementPrompt(
+function createEnhancedPrompt(
   jobDescription: string,
   profile: UserProfile,
   workExperiences: WorkExperience[],
   educations: Education[]
 ): string {
-  return `Expert ATS resume writer: Create a perfect first achievement that 100% matches the job description and attracts recruiters.
+  return `Expert ATS resume writer: Create strong, compelling achievements for ALL companies that match the exact seniority level required by the job.
+
+⚠️ CRITICAL SENIORITY MATCHING RULES:
+- ANALYZE the job description to determine the exact seniority level required (Junior, Mid-level, Senior, Staff, Principal, etc.)
+- MATCH the language and responsibilities to that exact level - DO NOT inflate or deflate
+- For Junior roles: Focus on learning, contributing, implementing, supporting, assisting
+- For Mid-level roles: Focus on developing, building, improving, collaborating, solving problems
+- For Senior roles: Focus on leading, architecting, mentoring, driving initiatives, strategic impact
+- NEVER use senior-level language (mentoring, leading teams, vast projects) for mid-level positions
+- NEVER use junior language (learning, assisting) for senior positions
 
 ⚠️ CRITICAL ANTI-AI-DETECTION RULES:
 - NEVER copy company names, team names, product names, or specific organizational details from the job description
@@ -273,95 +282,112 @@ ${educations.map(edu => `${edu.university} - ${edu.degree} (${edu.start_date} to
 
 CRITICAL INSTRUCTIONS:
 
-1. PROFESSIONAL TITLE: Create a concise, simple title that perfectly matches the job description requirements (avoid long titles)
+1. SENIORITY LEVEL ANALYSIS: 
+   - Carefully analyze the job description to determine the exact seniority level required
+   - Look for keywords like "Junior", "Mid-level", "Senior", "Staff", "Principal", "Lead", years of experience required
+   - Match ALL achievements to this exact level - no exceptions
 
-2. ROLE OPTIMIZATION: For each work experience, analyze the job description and create a simple, well-suited role title that:
-   - Perfectly matches the job requirements
-   - Uses key technologies/skills from the job posting
-   - Stays concise and professional (2-4 words max)
-   - Sounds natural and industry-appropriate
-   - Enhances relevance without being overly long
+2. PROFESSIONAL TITLE: Create a concise, simple title that perfectly matches the job description requirements and seniority level
 
-For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
-- Create a PERFECT project name using "${workExperiences[0]?.company || 'Company'} [Project Type]" format (e.g., "${workExperiences[0]?.company || 'BaileyTech'} Customer Platform" or "${workExperiences[0]?.company || 'StayAI'} Analytics Dashboard")
-- Write 50-70 words (not too long, not too short)
-- Include the TOP 5-7 most important keywords/technologies from the job description
-- Make it sound realistic and impressive to recruiters
-- Include specific metrics and business impact
-- Use natural, professional language that flows well
-- Focus on the exact skills and technologies the job requires
-- Make it unique and memorable
-- ENSURE it sounds like authentic work experience at ${workExperiences[0]?.company || 'their previous company'}
-- NEVER use project names from the job description - only from candidate's actual work history
+3. ROLE OPTIMIZATION: For each work experience, create role titles that match the job's seniority level:
+   - Junior level: "Software Developer", "Frontend Developer", "Backend Developer"
+   - Mid-level: "Software Engineer", "Full Stack Developer", "Systems Engineer"
+   - Senior level: "Senior Software Engineer", "Lead Developer", "Principal Engineer"
 
-5. OTHER ACHIEVEMENTS (Keep current structure):
-- Achievement 2: 50-70 words - Different project focus
-- Achievement 3: 40-60 words - Technical excellence
-- Achievement 4: 35-60 words - Collaboration/leadership
-- Achievement 5: 30-60 words - Process improvement
+4. ACHIEVEMENT STRENGTH FOR ALL COMPANIES:
+   - Company 1 (Most Recent): 5 strong achievements with detailed structured format
+   - Company 2: 5 strong achievements (not weak!) with good detail and impact
+   - Company 3+: 5 strong achievements each, maintaining quality and relevance
 
-6. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories and don't make N/A or blink ones. Make at least 4 skills in each items.
+5. ACHIEVEMENT GUIDELINES BY SENIORITY:
+
+FOR JUNIOR LEVEL POSITIONS:
+- Focus on: Contributing to projects, implementing features, learning technologies, supporting team goals
+- Avoid: Leading teams, mentoring, architecting systems, strategic decisions
+- Language: "Contributed to", "Implemented", "Developed", "Supported", "Collaborated on"
+
+FOR MID-LEVEL POSITIONS:
+- Focus on: Building systems, solving complex problems, improving processes, cross-team collaboration
+- Avoid: Mentoring junior developers, leading large teams, strategic architecture decisions
+- Language: "Built", "Developed", "Improved", "Optimized", "Collaborated with", "Solved"
+
+FOR SENIOR LEVEL POSITIONS:
+- Focus on: Leading initiatives, mentoring, architectural decisions, strategic impact, team leadership
+- Include: "Led", "Architected", "Mentored", "Drove", "Established", "Strategized"
+
+6. TECHNICAL SKILLS: Extract ALL technologies from job description + add comprehensive related technologies. Create 15 detailed categories with at least 4 skills each.
+
+ENHANCED ACHIEVEMENT STRUCTURE FOR ALL COMPANIES:
+
+Company 1 (${workExperiences[0]?.company || 'First Company'}):
+- Achievement 1: Structured format with description + 2 detailed bullet points (70-90 words total)
+- Achievements 2-5: Strong individual achievements (60-80 words each)
+
+Company 2 (${workExperiences[1]?.company || 'Second Company'}):
+- ALL 5 achievements should be strong and detailed (60-80 words each)
+- Focus on different aspects: technical implementation, problem-solving, collaboration, process improvement, innovation
+- Use technologies and methodologies from the job description
+- Match the seniority level exactly
+
+Company 3+ (${workExperiences.slice(2).map(w => w.company).join(', ')}):
+- ALL 5 achievements should be substantial and relevant (50-70 words each)
+- Maintain quality and avoid generic or weak statements
+- Show progression and growth appropriate to the seniority level
+- Include specific technologies and measurable impact
 
 DOMAIN ADAPTATION STRATEGY:
-1. Analyze the job description to identify the primary domain and key technologies needed
+1. Analyze the job description to identify the primary domain and exact seniority level needed
 2. Create project names using the candidate's ACTUAL company names in format "[Company Name] [Project Type]"
 3. Use technical terminology and methodologies from the job posting, but NEVER copy company/product names from the job description
 4. Focus on the most important 5-7 keywords rather than trying to fit everything
 5. Make project names sound realistic for what could be built at their actual previous companies
-6. Include impressive but believable metrics that could realistically be achieved at those companies
-7. Ensure achievements sound authentic to their actual work history, making it undetectable as AI-generated
-
-- Include TOP 5-7 keywords from job description
-- Realistic project name that matches job domain
-- Specific metrics and business impact
-- Natural, professional language
-- Unique and memorable content
-- 100% alignment with job requirements
+6. Include impressive but believable metrics that match the seniority level
+7. Ensure achievements sound authentic to their actual work history and seniority level
 
 Return ONLY this JSON:
 
 {
-  "professionalTitle": "Exact job title from posting with primary technologies",
-  "professionalSummary": "6-7 comprehensive sentences (50-70 words) integrating maximum keywords from job description naturally while highlighting years of experience, technical expertise, industry knowledge, leadership capabilities, and unique value proposition that directly matches job requirements",
+  "professionalTitle": "Exact job title matching seniority level and primary technologies",
+  "professionalSummary": "6-7 comprehensive sentences (60-80 words) integrating maximum keywords from job description naturally while highlighting appropriate years of experience for the seniority level, technical expertise, industry knowledge, and capabilities that directly match job requirements without over-inflating or under-selling",
   "workExperiences": [
     {
       "company": "${workExperiences[0]?.company || 'Company1'}",
-      "position": "AI-generated simple, well-suited role title based on job description (2-4 words max)",
+      "position": "Role title matching exact seniority level from job description (2-4 words max)",
       "achievements": [
         {
-          "description": "PERFECT FIRST ACHIEVEMENT: 40-50 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics with impressive but believable business results",
+          "description": "PERFECT FIRST ACHIEVEMENT: 50-60 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements and seniority level, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and metrics appropriate for the seniority level",
           "details": [
-            "Technical Implementation: 35-45 word detailed explanation of exactly what you did, the technical approach taken, specific technologies and methodologies used, architecture decisions made, and key technical solutions implemented to deliver the project successfully",
-            "Challenges & Solutions: 35-45 word detailed explanation of the main challenges faced during the project, specific problems encountered, innovative solutions developed, obstacles overcome, and how your problem-solving skills led to successful project completion"
+            "Technical Implementation: 40-50 word detailed explanation of exactly what you did at the appropriate seniority level, the technical approach taken, specific technologies and methodologies used, architecture decisions made (if senior), and key technical solutions implemented to deliver the project successfully",
+            "Challenges & Solutions: 40-50 word detailed explanation of the main challenges faced during the project, specific problems encountered, innovative solutions developed appropriate to seniority level, obstacles overcome, and how your problem-solving skills led to successful project completion"
           ]
         },
-        "90-120 word detailed sentence about another significant project highlighting different technologies and skills from job posting, your technical leadership role in system design and implementation, comprehensive problem-solving approaches, innovative solutions and methodologies, extensive cross-functional collaboration with various stakeholders, measurable impact on business metrics and performance improvements, strategic value delivered to the organization, and long-term business benefits",
-        "70-90 word professional sentence emphasizing technical excellence, advanced architecture decisions, code quality standards, innovation initiatives, best practices implementation, technical mentoring and knowledge sharing, continuous learning and skill development, advanced problem-solving skills, and technical leadership that directly aligns with technical requirements mentioned in job description",
-        "70-90 word comprehensive sentence showcasing collaboration excellence, team leadership capabilities, stakeholder management skills, cross-functional coordination and communication, effective project management and delivery, conflict resolution and relationship building, mentoring and team development, and leadership qualities that demonstrate soft skills and management abilities mentioned in job description",
-        "70-90 word detailed sentence highlighting process improvements, strategic initiatives, methodology implementation and optimization, efficiency improvements and innovation projects, transformational changes and business impact, strategic thinking and planning, value-add capabilities and business acumen, and organizational impact that demonstrates strategic value mentioned in job posting requirements"
+        "STRONG Achievement 2: 60-80 word detailed sentence about another significant project at ${workExperiences[0]?.company || 'Company1'} highlighting different technologies and skills from job posting, your technical role appropriate to seniority level in system design and implementation, comprehensive problem-solving approaches, collaboration with stakeholders, measurable impact on business metrics and performance improvements, and value delivered to the organization",
+        "STRONG Achievement 3: 60-80 word professional sentence emphasizing technical excellence appropriate to seniority level, architecture decisions (if applicable), code quality standards, innovation initiatives, best practices implementation, technical knowledge sharing, continuous learning and skill development, advanced problem-solving skills, and technical contributions that directly align with technical requirements mentioned in job description",
+        "STRONG Achievement 4: 60-80 word comprehensive sentence showcasing collaboration excellence, teamwork capabilities appropriate to seniority level, stakeholder management skills, cross-functional coordination and communication, effective project delivery, relationship building, and collaboration qualities that demonstrate soft skills mentioned in job description",
+        "STRONG Achievement 5: 60-80 word detailed sentence highlighting process improvements, initiatives appropriate to seniority level, methodology implementation and optimization, efficiency improvements and innovation projects, business impact, strategic thinking (if senior), value-add capabilities, and organizational impact that demonstrates value mentioned in job posting requirements"
       ]
     }${workExperiences.length > 1 ? `,
     {
       "company": "${workExperiences[1]?.company || 'Company2'}",
-      "position": "AI-generated simple, well-suited role title based on job description (2-4 words max)",
+      "position": "Role title matching exact seniority level from job description (2-4 words max)",
       "achievements": [
-        "50-70 word comprehensive sentence describing domain-specific project using '${workExperiences[1]?.company || 'CompanyName'} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "50-70 word detailed sentence about different ${workExperiences[1]?.company || 'company'} project using other technologies from posting, technical leadership, collaboration, and business impact",
-        "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "STRONG Achievement 1: 60-80 word comprehensive sentence describing domain-specific project using '${workExperiences[1]?.company || 'CompanyName'} [Project Type]' format, technologies from job description, detailed scope appropriate to seniority level, challenges, solutions, and quantified results that demonstrate impact",
+        "STRONG Achievement 2: 60-80 word detailed sentence about different ${workExperiences[1]?.company || 'company'} project using other technologies from posting, technical contributions appropriate to seniority level, collaboration, problem-solving, and measurable business impact with specific metrics",
+        "STRONG Achievement 3: 60-80 word sentence highlighting technical excellence and specific skills mentioned in job description, showcasing expertise appropriate to seniority level, innovation, quality standards, and technical contributions that align with job requirements",
+        "STRONG Achievement 4: 60-80 word sentence showcasing collaboration, communication, and teamwork skills from job requirements, demonstrating ability to work effectively with teams, stakeholders, and cross-functional groups at the appropriate seniority level",
+        "STRONG Achievement 5: 60-80 word sentence emphasizing process improvement and impact using methodologies from posting, showing initiative, efficiency improvements, and organizational value appropriate to the seniority level required by the job"
       ]
     }` : ''}${workExperiences.length > 2 ? workExperiences.slice(2).map((work, originalIndex) => {
       return `,
     {
       "company": "${work.company}",
-      "position": "AI-generated simple, well-suited role title based on job description (2-4 words max)",
+      "position": "Role title matching exact seniority level from job description (2-4 words max)",
       "achievements": [
-        "50-70 word comprehensive sentence describing domain-specific project using '${work.company} [Project Type]' format, technologies from job description, detailed scope, challenges, solutions, and quantified results",
-        "50-70 word detailed sentence about different ${work.company} project using other technologies from posting, technical leadership, collaboration, and business impact",
-        "40-60 word sentence highlighting technical excellence and specific skills mentioned in job description",
-        "40-60 word sentence showcasing collaboration, leadership, and communication skills from job requirements",
-        "40-60 word sentence emphasizing process improvement and strategic impact using methodologies from posting"
+        "STRONG Achievement 1: 50-70 word comprehensive sentence describing domain-specific project using '${work.company} [Project Type]' format, technologies from job description, detailed scope appropriate to seniority level, challenges, solutions, and quantified results",
+        "STRONG Achievement 2: 50-70 word detailed sentence about different ${work.company} project using other technologies from posting, technical contributions appropriate to seniority level, collaboration, and business impact",
+        "STRONG Achievement 3: 50-70 word sentence highlighting technical excellence and specific skills mentioned in job description, showcasing expertise appropriate to seniority level and technical contributions",
+        "STRONG Achievement 4: 50-70 word sentence showcasing collaboration, communication, and teamwork skills from job requirements, demonstrating effective work at the appropriate seniority level",
+        "STRONG Achievement 5: 50-70 word sentence emphasizing process improvement and strategic impact using methodologies from posting, showing value appropriate to the seniority level"
       ]
     }`}).join('') : ''}
   ],
@@ -412,7 +438,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert ATS resume writer. Your specialty is creating the PERFECT first achievement that 100% matches job descriptions and attracts recruiters. CRITICAL: NEVER use company names, team names, or specific organizational details from the job description. Instead, create generic but impressive project names that demonstrate the same expertise. Focus on creating a realistic, impressive project (90-110 words) that uses the TOP 5-7 keywords from the job description naturally. Make it unique, memorable, and professionally compelling while ensuring it cannot be identified as AI-generated.'
+          content: 'You are an expert ATS resume writer specializing in creating strong achievements for ALL companies and matching exact seniority levels. CRITICAL: 1) Analyze job description to determine exact seniority level (Junior/Mid/Senior) and match language accordingly - NEVER use senior language for mid-level roles. 2) Create strong, detailed achievements for ALL companies, not just the first one. 3) NEVER use company names from job description - only use candidate\'s actual company names. 4) Focus on appropriate responsibilities and impact for the seniority level required.'
         },
         {
           role: 'user',
@@ -420,7 +446,7 @@ async function generateWithOpenAI(prompt: string, apiKey: string) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 6000
+      max_tokens: 8000
     })
   })
 
@@ -451,24 +477,41 @@ async function generateWithAnthropic(prompt: string, apiKey: string) {
     },
     body: JSON.stringify({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 6000,
+      max_tokens: 8000,
       messages: [
         {
           role: 'user',
           content: `${prompt}
 
-CRITICAL FOCUS FOR FIRST ACHIEVEMENT:
-- Write exactly 70-90 words (perfect length for readability)
-- Use only the TOP 5-7 most important keywords from job description
-- NEVER use company names, team names, or specific organizational details from the job description
-- Create generic but impressive project names that demonstrate the same expertise and domain knowledge
-- Include specific, believable metrics and business impact
-- Make it sound natural and professional, not keyword-stuffed or AI-generated
-- Focus on what makes this candidate perfect for THIS specific job without copying specific details
-- Make it unique and memorable to stand out to recruiters
-- Ensure achievements sound authentic and could realistically come from the candidate's actual experience
+CRITICAL FOCUS FOR ALL ACHIEVEMENTS:
 
-The first achievement is the MOST IMPORTANT part of the entire resume. It must be perfect and undetectable as AI-generated.
+1. SENIORITY LEVEL MATCHING:
+- First, analyze the job description to determine the EXACT seniority level required
+- Match ALL language, responsibilities, and impact statements to that level
+- Junior: Focus on contributing, implementing, learning, supporting
+- Mid-level: Focus on developing, building, improving, solving, collaborating
+- Senior: Focus on leading, architecting, mentoring, driving, strategizing
+- NEVER mix seniority levels - be consistent throughout
+
+2. STRONG ACHIEVEMENTS FOR ALL COMPANIES:
+- Company 1: 5 strong achievements (first one structured, others 60-80 words each)
+- Company 2: 5 strong achievements (ALL should be 60-80 words, detailed and impactful)
+- Company 3+: 5 strong achievements each (50-70 words, substantial and relevant)
+- NO weak or generic achievements for any company
+- Each achievement should include specific technologies, measurable impact, and clear value
+
+3. ANTI-AI-DETECTION:
+- Use only candidate's actual company names for project names
+- Make achievements sound authentic and realistic for their work history
+- Include believable metrics appropriate to the seniority level
+- Ensure natural language flow without keyword stuffing
+
+4. TECHNICAL ALIGNMENT:
+- Include TOP 5-7 keywords from job description in each company's achievements
+- Use different technologies and skills across achievements to show breadth
+- Maintain consistency with the required seniority level throughout
+
+The goal is to create a resume where EVERY achievement is strong, relevant, and perfectly matched to the job's seniority requirements.
 
 Return ONLY valid JSON with no additional text or formatting.`
         }
