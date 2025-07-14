@@ -11,7 +11,14 @@ interface GeneratedResume {
     startDate: string
     endDate: string
     isCurrent: boolean
+<<<<<<< HEAD
     achievements: string[]
+=======
+    achievements: Array<string | {
+      description: string
+      details: string[]
+    }>
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
   }>
   technicalSkills: string[]
   personalInfo: {
@@ -47,6 +54,29 @@ export async function downloadPDF(resume: GeneratedResume) {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 
+<<<<<<< HEAD
+=======
+  // Helper function to render achievements
+  const renderAchievement = (achievement: string | { description: string; details: string[] }) => {
+    if (typeof achievement === 'string') {
+      const achievementLines = pdf.splitTextToSize(`• ${achievement}`, contentWidth - 5)
+      pdf.text(achievementLines, margin + 2, yPosition)
+      yPosition += achievementLines.length * 4 + 1
+    } else {
+      // Main description
+      const descriptionLines = pdf.splitTextToSize(`• ${achievement.description}`, contentWidth - 5)
+      pdf.text(descriptionLines, margin + 2, yPosition)
+      yPosition += descriptionLines.length * 4 + 2
+      
+      // Detailed bullet points
+      achievement.details.forEach(detail => {
+        const detailLines = pdf.splitTextToSize(`  ○ ${detail}`, contentWidth - 10)
+        pdf.text(detailLines, margin + 5, yPosition)
+        yPosition += detailLines.length * 4 + 1
+      })
+    }
+  }
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
   // Header
   pdf.setFontSize(24)
   pdf.setFont(undefined, 'bold')
@@ -122,9 +152,13 @@ export async function downloadPDF(resume: GeneratedResume) {
     pdf.setTextColor(0, 0, 0)
     pdf.setFont(undefined, 'normal')
     work.achievements.forEach(achievement => {
+<<<<<<< HEAD
       const achievementLines = pdf.splitTextToSize(`• ${achievement}`, contentWidth - 5)
       pdf.text(achievementLines, margin + 2, yPosition)
       yPosition += achievementLines.length * 4 + 1
+=======
+      renderAchievement(achievement)
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
     })
     yPosition += 8
   })
@@ -201,6 +235,81 @@ export async function downloadDocx(resume: GeneratedResume) {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 
+<<<<<<< HEAD
+=======
+  // Helper function to create achievement paragraphs
+  const createAchievementParagraphs = (achievement: string | { description: string; details: string[] }) => {
+    if (typeof achievement === 'string') {
+      return [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `• ${achievement}`,
+              size: 22, // 11pt
+              font: 'Calibri',
+            }),
+          ],
+          spacing: {
+            line: 276, // 1.15 line spacing
+            after: 120, // 6pt after
+          },
+          indent: {
+            left: 360, // 0.25 inch left indent
+            hanging: 180, // 0.125 inch hanging indent for bullet
+          },
+        })
+      ]
+    } else {
+      const paragraphs = [
+        // Main description
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `• ${achievement.description}`,
+              size: 22, // 11pt
+              color: '000000',
+            }),
+          ],
+          spacing: {
+            line: 276, // 1.15 line spacing
+            after: 60, // 3pt after
+          },
+          indent: {
+            left: 360, // 0.25 inch left indent
+            hanging: 180, // 0.125 inch hanging indent for bullet
+          },
+        })
+      ]
+      
+      // Add detailed bullet points
+      achievement.details.forEach(detail => {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `○ ${detail}`,
+                size: 20, // 10pt
+                font: 'Calibri',
+                color: '000000',
+              }),
+            ],
+            spacing: {
+              line: 276, // 1.15 line spacing
+              after: 80, // 4pt after
+            },
+            indent: {
+              left: 720, // 0.5 inch left indent
+              hanging: 180, // 0.125 inch hanging indent for bullet
+            },
+          })
+        )
+      })
+      
+      return paragraphs
+    }
+  }
+
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
   const doc = new Document({
     sections: [{
       properties: {
@@ -371,6 +480,7 @@ export async function downloadDocx(resume: GeneratedResume) {
           }),
           
           // Achievements with improved formatting
+<<<<<<< HEAD
           ...work.achievements.map(achievement => 
             new Paragraph({
               children: [
@@ -398,6 +508,9 @@ export async function downloadDocx(resume: GeneratedResume) {
               after: 240, // 12pt after
             },
           }),
+=======
+          ...work.achievements.flatMap(achievement => createAchievementParagraphs(achievement)),
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
         ]),
         
         // Technical Skills Section

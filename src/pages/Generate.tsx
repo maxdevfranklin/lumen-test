@@ -17,7 +17,14 @@ interface GeneratedResume {
     startDate: string
     endDate: string
     isCurrent: boolean
+<<<<<<< HEAD
     achievements: string[]
+=======
+    achievements: Array<string | {
+      description: string
+      details: string[]
+    }>
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
   }>
   technicalSkills: string[]
   personalInfo: {
@@ -49,6 +56,11 @@ export function Generate() {
   const [preferredAI, setPreferredAI] = useState<'openai' | 'anthropic'>('openai')
   const [generationCost, setGenerationCost] = useState<number | null>(null)
   const [currentJobHistoryId, setCurrentJobHistoryId] = useState<string | null>(null)
+<<<<<<< HEAD
+=======
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [savingEdits, setSavingEdits] = useState(false)
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
 
   useEffect(() => {
     if (user) {
@@ -181,6 +193,42 @@ export function Generate() {
     return Math.round((inputCost + outputCost) * 100) / 100
   }
 
+<<<<<<< HEAD
+=======
+  const handleResumeUpdate = (updatedResume: GeneratedResume) => {
+    setGeneratedResume(updatedResume)
+  }
+
+  const handleSaveEdits = async () => {
+    if (!generatedResume || !currentJobHistoryId) return
+
+    setSavingEdits(true)
+    try {
+      const { error } = await supabase
+        .from('resume_history')
+        .update({
+          resume_data: generatedResume,
+          updated_at: new Date().toISOString()
+        })
+        .eq('job_history_id', currentJobHistoryId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (error) {
+        console.error('Error saving edits:', error)
+        alert('Error saving changes. Please try again.')
+      } else {
+        alert('Changes saved successfully!')
+        setIsEditMode(false)
+      }
+    } catch (error) {
+      console.error('Error saving edits:', error)
+      alert('Error saving changes. Please try again.')
+    } finally {
+      setSavingEdits(false)
+    }
+  }
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
   const handleDownloadPDF = async () => {
     if (generatedResume) {
       await downloadPDF(generatedResume)
@@ -364,7 +412,44 @@ export function Generate() {
                 )}
                 
                 {generatedResume && (
+<<<<<<< HEAD
                   <div className="flex space-x-3">
+=======
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        {isEditMode ? 'Edit mode: Click on text to modify' : 'Preview mode'}
+                      </span>
+                      <div className="flex space-x-2">
+                        {!isEditMode ? (
+                          <button
+                            onClick={() => setIsEditMode(true)}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                          >
+                            Edit Resume
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={handleSaveEdits}
+                              disabled={savingEdits}
+                              className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                            >
+                              <Save className="h-3 w-3" />
+                              <span>{savingEdits ? 'Saving...' : 'Save Changes'}</span>
+                            </button>
+                            <button
+                              onClick={() => setIsEditMode(false)}
+                              className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex space-x-3">
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
                     <button
                       onClick={handleDownloadPDF}
                       className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -379,6 +464,10 @@ export function Generate() {
                       <Download className="h-4 w-4" />
                       <span>Download DOCX</span>
                     </button>
+<<<<<<< HEAD
+=======
+                    </div>
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
                   </div>
                 )}
               </div>
@@ -388,7 +477,15 @@ export function Generate() {
           {/* Preview Section */}
           <div className="space-y-6">
             {generatedResume ? (
+<<<<<<< HEAD
               <ResumePreview resume={generatedResume} />
+=======
+              <ResumePreview 
+                resume={generatedResume} 
+                onResumeUpdate={handleResumeUpdate}
+                isEditable={isEditMode}
+              />
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
             ) : (
               <div className="bg-white rounded-lg shadow-md p-8 text-center">
                 <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />

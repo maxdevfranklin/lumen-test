@@ -177,6 +177,25 @@ CREATE TRIGGER update_user_settings_updated_at
   BEFORE UPDATE ON user_settings
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+<<<<<<< HEAD
+=======
+
+-- Add updated_at to resume_history table
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'resume_history' AND column_name = 'updated_at'
+  ) THEN
+    ALTER TABLE resume_history ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+CREATE TRIGGER update_resume_history_updated_at
+  BEFORE UPDATE ON resume_history
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+>>>>>>> 4f41bb2 (WIP:local changes before pulling)
 ```
 
 ### 3. Verification Steps
