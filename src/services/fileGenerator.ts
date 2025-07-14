@@ -11,14 +11,10 @@ interface GeneratedResume {
     startDate: string
     endDate: string
     isCurrent: boolean
-<<<<<<< HEAD
-    achievements: string[]
-=======
     achievements: Array<string | {
       description: string
       details: string[]
     }>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   }>
   technicalSkills: string[]
   personalInfo: {
@@ -54,8 +50,6 @@ export async function downloadPDF(resume: GeneratedResume) {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 
-<<<<<<< HEAD
-=======
   // Helper function to render achievements
   const renderAchievement = (achievement: string | { description: string; details: string[] }) => {
     if (typeof achievement === 'string') {
@@ -76,7 +70,6 @@ export async function downloadPDF(resume: GeneratedResume) {
       })
     }
   }
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   // Header
   pdf.setFontSize(24)
   pdf.setFont(undefined, 'bold')
@@ -152,13 +145,7 @@ export async function downloadPDF(resume: GeneratedResume) {
     pdf.setTextColor(0, 0, 0)
     pdf.setFont(undefined, 'normal')
     work.achievements.forEach(achievement => {
-<<<<<<< HEAD
-      const achievementLines = pdf.splitTextToSize(`• ${achievement}`, contentWidth - 5)
-      pdf.text(achievementLines, margin + 2, yPosition)
-      yPosition += achievementLines.length * 4 + 1
-=======
       renderAchievement(achievement)
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
     })
     yPosition += 8
   })
@@ -235,8 +222,6 @@ export async function downloadDocx(resume: GeneratedResume) {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 
-<<<<<<< HEAD
-=======
   // Helper function to create achievement paragraphs
   const createAchievementParagraphs = (achievement: string | { description: string; details: string[] }) => {
     if (typeof achievement === 'string') {
@@ -309,7 +294,6 @@ export async function downloadDocx(resume: GeneratedResume) {
     }
   }
 
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   const doc = new Document({
     sections: [{
       properties: {
@@ -480,37 +464,7 @@ export async function downloadDocx(resume: GeneratedResume) {
           }),
           
           // Achievements with improved formatting
-<<<<<<< HEAD
-          ...work.achievements.map(achievement => 
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `• ${achievement}`,
-                  size: 22, // 11pt
-                  font: 'Calibri',
-                }),
-              ],
-              spacing: {
-                line: 276, // 1.15 line spacing
-                after: 120, // 6pt after
-              },
-              indent: {
-                left: 360, // 0.25 inch left indent
-                hanging: 180, // 0.125 inch hanging indent for bullet
-              },
-            })
-          ),
-          
-          // Clear separation between jobs
-          new Paragraph({
-            children: [new TextRun({ text: '', size: 12 })],
-            spacing: {
-              after: 240, // 12pt after
-            },
-          }),
-=======
           ...work.achievements.flatMap(achievement => createAchievementParagraphs(achievement)),
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         ]),
         
         // Technical Skills Section

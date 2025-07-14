@@ -282,11 +282,6 @@ CRITICAL INSTRUCTIONS:
    - Sounds natural and industry-appropriate
    - Enhances relevance without being overly long
 
-<<<<<<< HEAD
-3. PROFESSIONAL SUMMARY: 6-7 comprehensive sentences (200-250 words) with maximum keyword density from job description
-4. FIRST ACHIEVEMENT FOCUS (MOST IMPORTANT):
-=======
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
 For ${workExperiences[0]?.company || 'First Company'} - Achievement 1:
 - Create a PERFECT project name using "${workExperiences[0]?.company || 'Company'} [Project Type]" format (e.g., "${workExperiences[0]?.company || 'BaileyTech'} Customer Platform" or "${workExperiences[0]?.company || 'StayAI'} Analytics Dashboard")
 - Write 50-70 words (not too long, not too short)
@@ -316,11 +311,6 @@ DOMAIN ADAPTATION STRATEGY:
 6. Include impressive but believable metrics that could realistically be achieved at those companies
 7. Ensure achievements sound authentic to their actual work history, making it undetectable as AI-generated
 
-<<<<<<< HEAD
-FIRST ACHIEVEMENT REQUIREMENTS:
-- 90-110 words (perfect length)
-=======
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
 - Include TOP 5-7 keywords from job description
 - Realistic project name that matches job domain
 - Specific metrics and business impact
@@ -338,9 +328,6 @@ Return ONLY this JSON:
       "company": "${workExperiences[0]?.company || 'Company1'}",
       "position": "AI-generated simple, well-suited role title based on job description (2-4 words max)",
       "achievements": [
-<<<<<<< HEAD
-        "PERFECT FIRST ACHIEVEMENT: 90-110 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics, highlighting key technical implementations and solutions, demonstrating team collaboration and leadership, and showcasing quantified business results with impressive but believable metrics that sound authentic to working at ${workExperiences[0]?.company || 'this company'}",
-=======
         {
           "description": "PERFECT FIRST ACHIEVEMENT: 40-50 word sentence describing a specific project using the format '${workExperiences[0]?.company || 'CompanyName'} [Project Type]' that perfectly aligns with job requirements, incorporating the TOP 5-7 most important keywords and technologies from the job description, including specific scope and user metrics with impressive but believable business results",
           "details": [
@@ -348,7 +335,6 @@ Return ONLY this JSON:
             "Challenges & Solutions: 35-45 word detailed explanation of the main challenges faced during the project, specific problems encountered, innovative solutions developed, obstacles overcome, and how your problem-solving skills led to successful project completion"
           ]
         },
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         "90-120 word detailed sentence about another significant project highlighting different technologies and skills from job posting, your technical leadership role in system design and implementation, comprehensive problem-solving approaches, innovative solutions and methodologies, extensive cross-functional collaboration with various stakeholders, measurable impact on business metrics and performance improvements, strategic value delivered to the organization, and long-term business benefits",
         "70-90 word professional sentence emphasizing technical excellence, advanced architecture decisions, code quality standards, innovation initiatives, best practices implementation, technical mentoring and knowledge sharing, continuous learning and skill development, advanced problem-solving skills, and technical leadership that directly aligns with technical requirements mentioned in job description",
         "70-90 word comprehensive sentence showcasing collaboration excellence, team leadership capabilities, stakeholder management skills, cross-functional coordination and communication, effective project management and delivery, conflict resolution and relationship building, mentoring and team development, and leadership qualities that demonstrate soft skills and management abilities mentioned in job description",

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React from 'react'
-=======
 import React, { useState } from 'react'
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
 
 interface GeneratedResume {
   professionalTitle: string
@@ -13,14 +9,10 @@ interface GeneratedResume {
     startDate: string
     endDate: string
     isCurrent: boolean
-<<<<<<< HEAD
-    achievements: string[]
-=======
     achievements: Array<string | {
       description: string
       details: string[]
     }>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   }>
   technicalSkills: string[]
   personalInfo: {
@@ -39,11 +31,7 @@ interface GeneratedResume {
 
 interface ResumePreviewProps {
   resume: GeneratedResume
-<<<<<<< HEAD
-}
 
-export function ResumePreview({ resume }: ResumePreviewProps) {
-=======
   onResumeUpdate?: (updatedResume: GeneratedResume) => void
   isEditable?: boolean
 }
@@ -52,15 +40,12 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
 
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   const formatDate = (dateString: string) => {
     if (!dateString) return ''
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 
-<<<<<<< HEAD
-=======
   const handleEdit = (field: string, currentValue: string) => {
     if (!isEditable) return
     setEditingField(field)
@@ -186,7 +171,6 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
     }
   }
 
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
@@ -197,13 +181,9 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{resume.personalInfo.name}</h1>
-<<<<<<< HEAD
-          <div className="text-lg font-semibold text-blue-600 mb-3">{resume.professionalTitle}</div>
-=======
           <div className="text-lg font-semibold text-blue-600 mb-3">
             {renderEditableText('professionalTitle', resume.professionalTitle)}
           </div>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
           <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-gray-600">
             <span>{resume.personalInfo.email}</span>
             <span>{resume.personalInfo.phone}</span>
@@ -216,13 +196,9 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
           <h2 className="text-xl font-bold text-gray-900 mb-3 border-b-2 border-blue-600 pb-1">
             PROFESSIONAL SUMMARY
           </h2>
-<<<<<<< HEAD
-          <p className="text-gray-700 leading-relaxed">{resume.professionalSummary}</p>
-=======
           <p className="text-gray-700 leading-relaxed">
             {renderEditableText('professionalSummary', resume.professionalSummary)}
           </p>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         </section>
 
         {/* Professional Experience - Moved before Technical Skills */}
@@ -241,12 +217,6 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
                   {formatDate(work.startDate)} - {work.isCurrent ? 'Present' : formatDate(work.endDate)}
                 </div>
               </div>
-<<<<<<< HEAD
-              <ul className="list-disc list-inside space-y-1 text-gray-700">
-                {work.achievements.map((achievement, achievementIndex) => (
-                  <li key={achievementIndex} className="leading-relaxed">{achievement}</li>
-                ))}
-=======
               <ul className="list-disc list-inside space-y-2 text-gray-700">
                 {work.achievements.map((achievement, achievementIndex) => {
                   const workIndex = index
@@ -277,7 +247,6 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
                     )
                   }
                 })}
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
               </ul>
             </div>
           ))}
@@ -290,13 +259,9 @@ export function ResumePreview({ resume, onResumeUpdate, isEditable = false }: Re
           </h2>
           <div className="grid grid-cols-2 gap-2">
             {resume.technicalSkills.map((skill, index) => (
-<<<<<<< HEAD
-              <div key={index} className="text-gray-700">• {skill}</div>
-=======
               <div key={index} className="text-gray-700">
                 • {renderEditableText(`skill-${index}`, skill)}
               </div>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
             ))}
           </div>
         </section>

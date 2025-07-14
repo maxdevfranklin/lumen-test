@@ -167,10 +167,7 @@ export type Database = {
           generation_cost: number | null
           ai_provider: string
           created_at: string
-<<<<<<< HEAD
-=======
           updated_at: string
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         }
         Insert: {
           id?: string
@@ -179,10 +176,7 @@ export type Database = {
           generation_cost?: number | null
           ai_provider: string
           created_at?: string
-<<<<<<< HEAD
-=======
           updated_at?: string
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         }
         Update: {
           id?: string
@@ -191,10 +185,7 @@ export type Database = {
           generation_cost?: number | null
           ai_provider?: string
           created_at?: string
-<<<<<<< HEAD
-=======
           updated_at?: string
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
         }
       }
     }

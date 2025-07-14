@@ -17,14 +17,10 @@ interface GeneratedResume {
     startDate: string
     endDate: string
     isCurrent: boolean
-<<<<<<< HEAD
-    achievements: string[]
-=======
     achievements: Array<string | {
       description: string
       details: string[]
     }>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   }>
   technicalSkills: string[]
   personalInfo: {
@@ -56,11 +52,8 @@ export function Generate() {
   const [preferredAI, setPreferredAI] = useState<'openai' | 'anthropic'>('openai')
   const [generationCost, setGenerationCost] = useState<number | null>(null)
   const [currentJobHistoryId, setCurrentJobHistoryId] = useState<string | null>(null)
-<<<<<<< HEAD
-=======
   const [isEditMode, setIsEditMode] = useState(false)
   const [savingEdits, setSavingEdits] = useState(false)
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
 
   useEffect(() => {
     if (user) {
@@ -193,8 +186,6 @@ export function Generate() {
     return Math.round((inputCost + outputCost) * 100) / 100
   }
 
-<<<<<<< HEAD
-=======
   const handleResumeUpdate = (updatedResume: GeneratedResume) => {
     setGeneratedResume(updatedResume)
   }
@@ -228,7 +219,6 @@ export function Generate() {
       setSavingEdits(false)
     }
   }
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
   const handleDownloadPDF = async () => {
     if (generatedResume) {
       await downloadPDF(generatedResume)
@@ -412,9 +402,6 @@ export function Generate() {
                 )}
                 
                 {generatedResume && (
-<<<<<<< HEAD
-                  <div className="flex space-x-3">
-=======
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">
@@ -449,7 +436,6 @@ export function Generate() {
                       </div>
                     </div>
                     <div className="flex space-x-3">
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
                     <button
                       onClick={handleDownloadPDF}
                       className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -464,10 +450,7 @@ export function Generate() {
                       <Download className="h-4 w-4" />
                       <span>Download DOCX</span>
                     </button>
-<<<<<<< HEAD
-=======
                     </div>
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
                   </div>
                 )}
               </div>
@@ -477,15 +460,11 @@ export function Generate() {
           {/* Preview Section */}
           <div className="space-y-6">
             {generatedResume ? (
-<<<<<<< HEAD
-              <ResumePreview resume={generatedResume} />
-=======
               <ResumePreview 
                 resume={generatedResume} 
                 onResumeUpdate={handleResumeUpdate}
                 isEditable={isEditMode}
               />
->>>>>>> 4f41bb2 (WIP:local changes before pulling)
             ) : (
               <div className="bg-white rounded-lg shadow-md p-8 text-center">
                 <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
